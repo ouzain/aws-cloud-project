@@ -127,11 +127,11 @@ resource "aws_security_group" "alb" {
 
 resource "aws_security_group" "ec2" {
   name        = "${var.project_name}-ec2-sg"
-  description = "EC2 : HTTP depuis l'ALB uniquement + SSH depuis l'IP admin"
+  description = "EC2 : HTTP depuis ALB uniquement + SSH depuis IP admin"
   vpc_id      = aws_vpc.this.id
 
   ingress {
-    description     = "HTTP depuis l'ALB"
+    description     = "HTTP depuis ALB"
     from_port       = 3000
     to_port          = 3000
     protocol        = "tcp"
@@ -139,7 +139,7 @@ resource "aws_security_group" "ec2" {
   }
 
   ingress {
-    description = "SSH depuis l'IP admin"
+    description = "SSH depuis IP admin"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -161,11 +161,11 @@ resource "aws_security_group" "ec2" {
 
 resource "aws_security_group" "rds" {
   name        = "${var.project_name}-rds-sg"
-  description = "RDS : accessible uniquement depuis l'EC2"
+  description = "RDS : accessible uniquement depuis EC2"
   vpc_id      = aws_vpc.this.id
 
   ingress {
-    description     = "MySQL depuis l'EC2"
+    description     = "MySQL depuis EC2"
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
