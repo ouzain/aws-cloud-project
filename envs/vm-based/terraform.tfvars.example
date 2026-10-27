@@ -1,0 +1,12 @@
+# Copie ce fichier en "terraform.tfvars" (gitignored) et adapte les valeurs.
+
+aws_region   = "eu-west-3"
+aws_profile  = "default"   # celui créé avec `aws configure --profile default`
+project_name = "vitalora"
+owner_tag    = "ousmane"            # ton prénom
+
+admin_cidr = "46.193.65.70/32"         # Trouve ton IP publique sur whatismyip.com ou avec `curl -4 ifconfig.me`, puis remplace cette valeur par ton IP suivie de /32.
+
+instance_type = "t3.micro"
+key_name      = null              # ou le nom d'une key pair EC2 existante si tu veux du SSH
+

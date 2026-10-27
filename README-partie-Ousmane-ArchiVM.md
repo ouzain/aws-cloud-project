@@ -7,15 +7,15 @@ pour pouvoir valider de bout en bout.
 ## 0. Prérequis (une fois par personne)
 
 ```bash
-aws configure --profile ton-profil-aws
+aws configure --profile default
 # Access Key, Secret, région eu-west-3
 
-# Bucket S3 pour TON state, dans TON compte (remplace le nom, il doit être unique globalement)
-aws s3 mb s3://tfstate-vitalora-ouzain --profile ton-profil-aws --region eu-west-3
+# Bucket S3 pour mon state, dans mon compte (remplace le nom, il doit être unique globalement)
+aws s3 mb s3://tfstate-vitalora-ouzain --profile default --region eu-west-3
 aws s3api put-bucket-versioning \
   --bucket tfstate-vitalora-ouzain \
   --versioning-configuration Status=Enabled \
-  --profile ton-profil-aws
+  --profile default
 ```
 
 Copie les fichiers d'exemple :
@@ -23,7 +23,7 @@ Copie les fichiers d'exemple :
 ```bash
 cd envs/vm-based
 cp terraform.tfvars.example terraform.tfvars        # édite-le (profil, owner_tag, admin_cidr)
-cp backend-example.hcl backend-ouzain.hcl             # édite-le (nom de ton bucket)
+cp backend-example.hcl backend-ouzain.hcl             # édite-le (nom de mon bucket)
 ```
 
 ## 1. Déployer (Phases 1 + 2)
@@ -44,7 +44,7 @@ DB_ENDPOINT=$(terraform output -raw db_endpoint)
 mysql -h "$DB_ENDPOINT" -P 3306 -u vitalora_admin -p vitalora < ../../sql/schema.sql
 # Le mot de passe est dans SSM : 
 aws ssm get-parameter --name /vitalora/db/password --with-decryption \
-  --query 'Parameter.Value' --output text --profile ton-profil-aws
+  --query 'Parameter.Value' --output text --profile default
 ```
 
 Il faut lancer cette commande depuis un poste qui peut atteindre RDS sur le
