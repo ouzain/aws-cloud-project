@@ -1,15 +1,19 @@
-// VITALORA — serveur web minimal (Node.js + Express + MySQL)
-// Le brief est clair : l'interface n'est pas l'objectif du projet, ce fichier
-// reste volontairement simple. Il sert surtout à valider que la chaîne
-// ALB -> EC2 -> RDS fonctionne de bout en bout (Phases 1 et 2 du roadmap).
+// VITALORA — serveur web (Node.js + Express + MySQL)
+// Phase 3 du roadmap : catalogue, commandes, front minimal servi en statique.
+// Le brief est clair : l'interface n'est pas l'objectif du projet, le front
+// (public/) reste volontairement simple — il sert à démontrer le parcours
+// catalogue -> commande -> confirmation de bout en bout.
 
+const path = require("path");
 const express = require("express");
 const mysql = require("mysql2/promise");
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 3000;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -27,11 +31,14 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.get("/", (req, res) => {
-  res.send(
-    "<h1>VITALORA</h1><p>Boutique en ligne de compléments alimentaires.</p>" +
-      '<p>Catalogue : <a href="/products">/products</a></p>'
-  );
+// Le front (public/app.js) construit les URLs d'images produits à partir de
+// ça plutôt que de coder le bucket en dur côté client.
+app.get("/config", (req, res) => {
+  const bucket = process.env.ASSETS_BUCKET;
+  const region = process.env.AWS_REGION || "eu-west-3";
+  res.json({
+    assetsBaseUrl: bucket ? `https://${bucket}.s3.${region}.amazonaws.com` : null,
+  });
 });
 
 app.get("/products", async (req, res) => {
@@ -58,14 +65,34 @@ app.get("/products/:id", async (req, res) => {
   }
 });
 
+function validateOrderPayload(body) {
+  const { customer_email, items } = body || {};
+
+  if (typeof customer_email !== "string" || !EMAIL_RE.test(customer_email)) {
+    return "invalid_email";
+  }
+  if (!Array.isArray(items) || items.length === 0) {
+    return "empty_cart";
+  }
+  for (const item of items) {
+    const productId = Number(item && item.product_id);
+    const qty = Number(item && item.qty);
+    if (!Number.isInteger(productId) || productId <= 0) return "invalid_product_id";
+    if (!Number.isInteger(qty) || qty <= 0 || qty > 50) return "invalid_quantity";
+  }
+  return null;
+}
+
 // POST /orders { customer_email, items: [{ product_id, qty }] }
 app.post("/orders", async (req, res) => {
-  const { customer_email, items } = req.body || {};
-  if (!customer_email || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ error: "invalid_order" });
+  const validationError = validateOrderPayload(req.body);
+  if (validationError) {
+    return res.status(400).json({ error: validationError });
   }
 
+  const { customer_email, items } = req.body;
   const conn = await pool.getConnection();
+
   try {
     await conn.beginTransaction();
 
@@ -76,31 +103,71 @@ app.post("/orders", async (req, res) => {
     const orderId = orderResult.insertId;
 
     for (const item of items) {
-      const [[product]] = await conn.query("SELECT price_cents FROM products WHERE product_id = ?", [
-        item.product_id,
-      ]);
-      if (!product) throw new Error(`product_not_found:${item.product_id}`);
+      // FOR UPDATE verrouille la ligne le temps de la transaction : deux
+      // commandes concurrentes sur le même produit ne peuvent pas lire le
+      // même stock et le décrémenter toutes les deux en double.
+      const [[product]] = await conn.query(
+        "SELECT price_cents, stock_qty FROM products WHERE product_id = ? FOR UPDATE",
+        [item.product_id]
+      );
+      if (!product) {
+        throw Object.assign(new Error("product_not_found"), { httpStatus: 400, code: "product_not_found" });
+      }
+      if (product.stock_qty < item.qty) {
+        throw Object.assign(new Error("insufficient_stock"), { httpStatus: 409, code: "insufficient_stock" });
+      }
 
       await conn.query(
         "INSERT INTO order_items (order_id, product_id, qty, unit_price_cents) VALUES (?, ?, ?, ?)",
         [orderId, item.product_id, item.qty, product.price_cents]
       );
+      await conn.query("UPDATE products SET stock_qty = stock_qty - ? WHERE product_id = ?", [
+        item.qty,
+        item.product_id,
+      ]);
     }
 
     await conn.commit();
 
-    // TODO (Phase 4, Personne C) : publier sur SNS pour déclencher la
-    // confirmation client + le traitement interne (emballage/expédition).
-    // L'IAM du rôle EC2 autorise déjà sns:Publish sur `${project_name}-*`,
-    // il suffira d'ajouter l'appel SDK ici une fois le topic créé.
+    // TODO (Phase 4, Personne C) : publier sur SNS (topic vitalora-order-
+    // confirmation) pour déclencher la confirmation client et le traitement
+    // interne (emballage/expédition). L'IAM du rôle EC2 autorise déjà
+    // sns:Publish sur `vitalora-*`, il suffira d'ajouter l'appel SDK ici.
+    // Le statut passera alors received -> confirmed -> processing -> shipped.
 
     res.status(201).json({ order_id: orderId, status: "received" });
   } catch (err) {
     await conn.rollback();
-    console.error("POST /orders failed:", err.message);
-    res.status(500).json({ error: "order_failed" });
+    const status = err.httpStatus || 500;
+    const code = err.code || "order_failed";
+    if (status === 500) console.error("POST /orders failed:", err.message);
+    res.status(status).json({ error: code });
   } finally {
     conn.release();
+  }
+});
+
+// Récupère une commande + ses lignes, pour l'écran de confirmation du front
+// et pour le scénario de démo (section "Scénarios de test" du roadmap).
+app.get("/orders/:id", async (req, res) => {
+  try {
+    const [[order]] = await pool.query("SELECT * FROM orders WHERE order_id = ?", [req.params.id]);
+    if (!order) return res.status(404).json({ error: "not_found" });
+
+    const [items] = await pool.query(
+      `SELECT oi.product_id, p.name, oi.qty, oi.unit_price_cents
+       FROM order_items oi
+       JOIN products p ON p.product_id = oi.product_id
+       WHERE oi.order_id = ?`,
+      [req.params.id]
+    );
+
+    const total_cents = items.reduce((sum, it) => sum + it.qty * it.unit_price_cents, 0);
+
+    res.json({ ...order, items, total_cents });
+  } catch (err) {
+    console.error("GET /orders/:id failed:", err.message);
+    res.status(500).json({ error: "order_lookup_failed" });
   }
 });
 

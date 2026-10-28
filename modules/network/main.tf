@@ -133,7 +133,7 @@ resource "aws_security_group" "ec2" {
   ingress {
     description     = "HTTP depuis ALB"
     from_port       = 3000
-    to_port          = 3000
+    to_port         = 3000
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }

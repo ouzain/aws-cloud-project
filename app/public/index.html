@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VITALORA — Compléments alimentaires</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>VITALORA</h1>
+    <button id="cart-toggle" class="cart-toggle" type="button">
+      Panier (<span id="cart-count">0</span>)
+    </button>
+  </header>
+
+  <nav class="category-tabs" id="category-tabs">
+    <button class="tab active" data-category="">Tous</button>
+    <button class="tab" data-category="bien-etre">Bien-être &amp; routines</button>
+    <button class="tab" data-category="nutrition-sportive">Nutrition sportive</button>
+    <button class="tab" data-category="plantes">Compléments à base de plantes</button>
+    <button class="tab" data-category="beaute">Beauté &amp; nutrition</button>
+  </nav>
+
+  <main>
+    <section id="catalog" class="catalog" aria-live="polite">
+      <p class="loading">Chargement du catalogue…</p>
+    </section>
+  </main>
+
+  <aside id="cart-panel" class="cart-panel hidden" aria-label="Panier">
+    <div class="cart-panel-header">
+      <h2>Votre panier</h2>
+      <button id="cart-close" type="button" aria-label="Fermer">×</button>
+    </div>
+    <div id="cart-items" class="cart-items"></div>
+    <p class="cart-total">Total : <strong id="cart-total">0,00 €</strong></p>
+
+    <form id="order-form">
+      <label for="customer-email">E-mail</label>
+      <input type="email" id="customer-email" name="customer_email" placeholder="toi@exemple.fr" required />
+      <button type="submit" id="submit-order">Valider la commande</button>
+    </form>
+
+    <p id="order-feedback" class="order-feedback" role="status"></p>
+  </aside>
+
+  <div id="confirmation" class="confirmation hidden">
+    <div class="confirmation-box">
+      <h2>Commande enregistrée</h2>
+      <p>Numéro de commande : <strong id="confirm-order-id"></strong></p>
+      <p id="confirm-total"></p>
+      <p class="confirmation-note">
+        Une confirmation sera envoyée par e-mail dès le traitement interne
+        (emballage, expédition) terminé.
+      </p>
+      <button id="confirmation-close" type="button">Fermer</button>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
