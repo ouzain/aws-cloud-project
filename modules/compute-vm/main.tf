@@ -41,6 +41,22 @@ resource "aws_iam_role" "ec2" {
   }
 }
 
+/*resource "aws_iam_role_policy" "ec2_sns_publish_policy" {
+  name = "vitalora-ec2-sns-publish"
+  role = "NOM_DU_ROLE_IAM_DE_L_EC2" # Le rôle attaché à l'instance EC2 de ton camarade
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "sns:Publish"
+        Resource = "arn:aws:sns:eu-west-3:523842384104:vitalora-order-topic-dev"
+      }
+    ]
+  })
+}*/
+
 resource "aws_iam_role_policy" "ec2" {
   name = "${var.project_name}-ec2-policy"
   role = aws_iam_role.ec2.id

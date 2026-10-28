@@ -1,0 +1,13 @@
+{
+  "order_id": "ORD-VITALORA-100",
+  "customer_email": "acheteur@vitalora.fr",
+  "status": "confirmed",
+  "items": [
+    {
+      "product_id": "PROD-MAG-01",
+      "category": "Bien-être",
+      "qty": 2,
+      "unit_price_cents": 1990
+    }
+  ]
+}
