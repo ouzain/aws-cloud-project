@@ -52,9 +52,9 @@ resource "aws_db_instance" "this" {
   engine_version = var.engine_version
   instance_class = var.instance_class
 
-  allocated_storage     = var.allocated_storage
-  storage_type           = "gp3"
-  storage_encrypted      = true # clé KMS par défaut aws/rds, pas de frais de clé
+  allocated_storage = var.allocated_storage
+  storage_type      = "gp3"
+  storage_encrypted = true # clé KMS par défaut aws/rds, pas de frais de clé
 
   db_name  = var.db_name
   username = var.db_username

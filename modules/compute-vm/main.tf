@@ -55,9 +55,9 @@ resource "aws_iam_role_policy" "ec2" {
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.db_password_ssm_name}"
       },
       {
-        Sid      = "ReadProductImages"
-        Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:ListBucket"]
+        Sid    = "ReadProductImages"
+        Effect = "Allow"
+        Action = ["s3:GetObject", "s3:ListBucket"]
         Resource = [
           "arn:aws:s3:::${var.assets_bucket_name}",
           "arn:aws:s3:::${var.assets_bucket_name}/*"
@@ -97,14 +97,17 @@ resource "aws_launch_template" "web" {
   vpc_security_group_ids = [var.ec2_sg_id]
 
   user_data = base64encode(templatefile("${path.module}/templates/user_data.sh.tpl", {
-    package_json          = file("${path.module}/../../app/package.json")
-    server_js              = file("${path.module}/../../app/server.js")
-    db_host                = var.db_endpoint
-    db_name                = var.db_name
-    db_username             = var.db_username
-    db_password_ssm_name    = var.db_password_ssm_name
-    assets_bucket          = var.assets_bucket_name
-    aws_region              = var.aws_region
+    package_json         = file("${path.module}/../../app/package.json")
+    server_js            = file("${path.module}/../../app/server.js")
+    index_html_gz        = base64gzip(file("${path.module}/../../app/public/index.html"))
+    app_js_gz            = base64gzip(file("${path.module}/../../app/public/app.js"))
+    style_css_gz         = base64gzip(file("${path.module}/../../app/public/style.css"))
+    db_host              = var.db_endpoint
+    db_name              = var.db_name
+    db_username          = var.db_username
+    db_password_ssm_name = var.db_password_ssm_name
+    assets_bucket        = var.assets_bucket_name
+    aws_region           = var.aws_region
   }))
 
   tag_specifications {

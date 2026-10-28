@@ -16,6 +16,12 @@ cat > server.js <<'SERVER_EOF'
 ${server_js}
 SERVER_EOF
 
+# Front statique servi par express.static (compressé pour rester sous 16 Ko de user_data)
+mkdir -p public
+echo '${index_html_gz}' | base64 -d | gunzip > public/index.html
+echo '${app_js_gz}' | base64 -d | gunzip > public/app.js
+echo '${style_css_gz}' | base64 -d | gunzip > public/style.css
+
 npm install --omit=dev
 
 # --- Secret récupéré via SSM Parameter Store, jamais en dur ----------------
