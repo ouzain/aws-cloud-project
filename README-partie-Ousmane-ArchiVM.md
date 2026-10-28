@@ -39,20 +39,100 @@ en `healthy`, et que RDS finisse de provisionner).
 
 ## 2. Charger le schéma et les données de départ
 
+RDS est en subnet privé (`publicly_accessible = false`) et son security group
+n'accepte le port 3306 que depuis l'EC2. Un `mysql -h <endpoint>` lancé depuis
+ta machine expire donc (`ERROR 2003 ... (60)`). Il faut passer par l'EC2, avec
+un tunnel SSH.
+
+### 2.1 Prérequis
+
+1. **Client MySQL** sur ta machine : `brew install mysql-client` (macOS).
+2. **Droits IAM** : l'utilisateur AWS CLI doit pouvoir lire le mot de passe
+   (`ssm:GetParameter` sur `/vitalora/db/*`, par ex. la policy
+   `AmazonSSMReadOnlyAccess`). Sans cela : `AccessDeniedException`.
+3. **Région** : tout est en `eu-west-3`. Si ton profil AWS est dans une autre
+   région, ajoute toujours `--region eu-west-3`, sinon `ParameterNotFound`.
+4. **Key pair EC2** : sans `key_name`, l'EC2 n'a aucune clé SSH.
+   - Crée la clé dans eu-west-3 (le `.pem` n'est téléchargeable qu'une fois) :
+     ```bash
+     aws ec2 create-key-pair --key-name vitalora-key --region eu-west-3 --profile default \
+       --query KeyMaterial --output text > ~/.ssh/vitalora-key.pem
+     chmod 400 ~/.ssh/vitalora-key.pem
+     ```
+   - Renseigne-la dans `terraform.tfvars` (**avec des guillemets**, sinon
+     `Variables not allowed`) : `key_name = "vitalora-key"`
+   - Applique : `terraform apply`
+5. **Recréer l'instance** : `key_name` ne s'applique qu'à la création d'une
+   instance. L'ASG ne remplace pas l'instance existante, il faut la terminer
+   pour qu'il en lance une nouvelle avec la clé :
+   ```bash
+   aws ec2 describe-instances --region eu-west-3 --profile default \
+     --filters "Name=instance-state-name,Values=running" \
+     --query 'Reservations[].Instances[].[InstanceId,KeyName,PublicIpAddress]' --output table
+   # Si KeyName vaut None :
+   aws ec2 terminate-instances --instance-ids <i-xxxx> --region eu-west-3 --profile default
+   ```
+   Attends 1-2 min, relance la commande `describe-instances` : `KeyName` doit
+   valoir `vitalora-key`. Note la nouvelle `PublicIpAddress` (elle change à
+   chaque recréation).
+6. **Port 22** : le CIDR autorisé (`admin_cidr`) doit correspondre à ton IP
+   publique actuelle (`curl ifconfig.me`).
+
+### 2.2 Ouvrir le tunnel SSH (terminal 1, à laisser ouvert)
+
 ```bash
+cd envs/vm-based
 DB_ENDPOINT=$(terraform output -raw db_endpoint)
-mysql -h "$DB_ENDPOINT" -P 3306 -u vitalora_admin -p vitalora < ../../sql/schema.sql
-# Le mot de passe est dans SSM : 
-aws ssm get-parameter --name /vitalora/db/password --with-decryption \
-  --query 'Parameter.Value' --output text --profile default
+ssh -i ~/.ssh/vitalora-key.pem -N -L 3307:"$DB_ENDPOINT":3306 ec2-user@<IP_PUBLIQUE_EC2>
 ```
 
-Il faut lancer cette commande depuis un poste qui peut atteindre RDS sur le
-port 3306 — RDS est en subnet privé, donc pas accessible depuis ta machine
-directement. Deux options simples :
-- un tunnel SSH via l'EC2 (`key_name` doit être renseigné dans `terraform.tfvars`) :
-  `ssh -i ta-cle.pem -L 3306:$DB_ENDPOINT:3306 ec2-user@$(terraform output -raw alb_dns_name)` n'est pas possible via l'ALB (il ne fait que du HTTP) — passe par l'IP publique de l'instance EC2 (console AWS) à la place de l'ALB.
-- ou exécute la commande `mysql` directement **sur l'EC2** (elle est dans le même VPC) : `ssh ec2-user@<ip-publique-ec2>` puis lance le client `mysql` depuis là (installe-le avec `sudo dnf install -y mariadb105`).
+- On utilise le port local `3307` pour ne pas entrer en conflit avec un MySQL local.
+- L'IP à utiliser est celle de l'EC2, pas l'ALB (il ne fait que du HTTP).
+- La première connexion demande de confirmer l'empreinte : réponds `yes`.
+- `Permission denied (publickey...)` : l'instance n'a pas la clé (voir étape 5)
+  ou le `.pem` ne correspond pas à la key pair.
+
+### 2.3 Importer le schéma (terminal 2)
+
+```bash
+cd envs/vm-based
+DB_PASS=$(aws ssm get-parameter --name /vitalora/db/password --with-decryption \
+  --query 'Parameter.Value' --output text --region eu-west-3 --profile default)
+MYSQL_PWD="$DB_PASS" mysql -h 127.0.0.1 -P 3307 -u vitalora_admin vitalora < ../../sql/schema.sql
+unset DB_PASS
+```
+
+Vérification :
+
+```bash
+MYSQL_PWD="$(aws ssm get-parameter --name /vitalora/db/password --with-decryption \
+  --query Parameter.Value --output text --region eu-west-3 --profile default)" \
+  mysql -h 127.0.0.1 -P 3307 -u vitalora_admin vitalora -e "SHOW TABLES;"
+```
+
+Quand c'est terminé, ferme le tunnel (`Ctrl+C` dans le terminal 1).
+
+### Alternative : exécuter depuis l'EC2
+
+```bash
+scp -i ~/.ssh/vitalora-key.pem ../../sql/schema.sql ec2-user@<IP_PUBLIQUE_EC2>:~
+ssh -i ~/.ssh/vitalora-key.pem ec2-user@<IP_PUBLIQUE_EC2>
+# Sur l'EC2 :
+sudo dnf install -y mariadb105
+PASS=$(aws ssm get-parameter --name /vitalora/db/password --with-decryption \
+  --query Parameter.Value --output text --region eu-west-3)
+MYSQL_PWD="$PASS" mysql -h <db_endpoint> -u vitalora_admin vitalora < ~/schema.sql
+```
+
+### Dépannage
+
+| Erreur | Cause | Solution |
+|---|---|---|
+| `AccessDeniedException ... ssm:GetParameter` | Pas de droit IAM | Attacher une policy SSM en lecture |
+| `ParameterNotFound` | Mauvaise région ou `apply` non fait | `--region eu-west-3`, vérifier `terraform state list \| grep ssm` |
+| `Variables not allowed` | Valeur sans guillemets dans le `.tfvars` | `key_name = "vitalora-key"` |
+| `ERROR 2003 ... (60)` | RDS privé, accès direct impossible | Passer par le tunnel SSH |
+| `Permission denied (publickey)` | EC2 sans la clé | Terminer l'instance pour que l'ASG la recrée |
 
 ## 3. Valider (critères du roadmap)
 
