@@ -1,5 +1,6 @@
 // VITALORA — serveur web (Node.js + Express + MySQL)
 // Phase 3 du roadmap : catalogue, commandes, front minimal servi en statique.
+// Phase 4 : chaque commande créée est publiée sur SNS (fan-out vers SQS).
 // Le brief est clair : l'interface n'est pas l'objectif du projet, le front
 // (public/) reste volontairement simple — il sert à démontrer le parcours
 // catalogue -> commande -> confirmation de bout en bout.
@@ -7,6 +8,7 @@
 const path = require("path");
 const express = require("express");
 const mysql = require("mysql2/promise");
+const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
 
 const app = express();
 app.use(express.json());
@@ -14,6 +16,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 3000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const sns = new SNSClient({ region: process.env.AWS_REGION || "eu-west-3" });
+const ORDER_TOPIC_ARN = process.env.ORDER_TOPIC_ARN;
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -65,6 +70,28 @@ app.get("/products/:id", async (req, res) => {
   }
 });
 
+// Publie l'événement "commande créée". Appelé APRÈS le commit : la commande est
+// déjà enregistrée, un échec SNS est donc loggé mais ne doit pas la faire échouer.
+async function publishOrderCreated(order) {
+  if (!ORDER_TOPIC_ARN) {
+    console.warn("ORDER_TOPIC_ARN not set, skipping order event for order", order.order_id);
+    return;
+  }
+  try {
+    const { MessageId } = await sns.send(
+      new PublishCommand({
+        TopicArn: ORDER_TOPIC_ARN,
+        Subject: `VITALORA - commande #${order.order_id} confirmee`,
+        Message: JSON.stringify(order),
+        MessageAttributes: { eventType: { DataType: "String", StringValue: "order.created" } },
+      })
+    );
+    console.log(`order ${order.order_id} published to SNS (MessageId ${MessageId})`);
+  } catch (err) {
+    console.error(`SNS publish failed for order ${order.order_id}:`, err.message);
+  }
+}
+
 function validateOrderPayload(body) {
   const { customer_email, items } = body || {};
 
@@ -101,6 +128,7 @@ app.post("/orders", async (req, res) => {
       [customer_email]
     );
     const orderId = orderResult.insertId;
+    let totalCents = 0;
 
     for (const item of items) {
       // FOR UPDATE verrouille la ligne le temps de la transaction : deux
@@ -121,6 +149,7 @@ app.post("/orders", async (req, res) => {
         "INSERT INTO order_items (order_id, product_id, qty, unit_price_cents) VALUES (?, ?, ?, ?)",
         [orderId, item.product_id, item.qty, product.price_cents]
       );
+      totalCents += item.qty * product.price_cents;
       await conn.query("UPDATE products SET stock_qty = stock_qty - ? WHERE product_id = ?", [
         item.qty,
         item.product_id,
@@ -129,11 +158,13 @@ app.post("/orders", async (req, res) => {
 
     await conn.commit();
 
-    // TODO (Phase 4, Personne C) : publier sur SNS (topic vitalora-order-
-    // confirmation) pour déclencher la confirmation client et le traitement
-    // interne (emballage/expédition). L'IAM du rôle EC2 autorise déjà
-    // sns:Publish sur `vitalora-*`, il suffira d'ajouter l'appel SDK ici.
-    // Le statut passera alors received -> confirmed -> processing -> shipped.
+    await publishOrderCreated({
+      order_id: orderId,
+      customer_email,
+      items: items.map((it) => ({ product_id: Number(it.product_id), qty: Number(it.qty) })),
+      total_cents: totalCents,
+      created_at: new Date().toISOString(),
+    });
 
     res.status(201).json({ order_id: orderId, status: "received" });
   } catch (err) {

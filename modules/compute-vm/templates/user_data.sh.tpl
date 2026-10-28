@@ -12,9 +12,8 @@ cat > package.json <<'PKG_EOF'
 ${package_json}
 PKG_EOF
 
-cat > server.js <<'SERVER_EOF'
-${server_js}
-SERVER_EOF
+# server.js est compressé lui aussi : user_data est limité à 16 Ko
+echo '${server_js_gz}' | base64 -d | gunzip > server.js
 
 # Front statique servi par express.static (compressé pour rester sous 16 Ko de user_data)
 mkdir -p public
@@ -41,6 +40,7 @@ DB_USER=${db_username}
 DB_PASSWORD=$${DB_PASSWORD}
 ASSETS_BUCKET=${assets_bucket}
 AWS_REGION=${aws_region}
+ORDER_TOPIC_ARN=${order_topic_arn}
 ENV_EOF
 chmod 600 /opt/vitalora/.env
 chown ec2-user:ec2-user /opt/vitalora -R

@@ -71,3 +71,8 @@ variable "db_password_ssm_name" {
 variable "assets_bucket_name" {
   type = string
 }
+
+variable "order_topic_arn" {
+  description = "ARN du topic SNS order-confirmation sur lequel l'app publie à chaque commande"
+  type        = string
+}
