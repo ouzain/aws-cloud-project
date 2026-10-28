@@ -10,3 +10,7 @@ output "db_endpoint" {
 output "assets_bucket_name" {
   value = module.database.assets_bucket_name
 }
+
+output "sns_topic_arn" {
+  value = module.serverless.sns_topic_arn
+}

@@ -33,3 +33,10 @@ module "compute_vm" {
   db_password_ssm_name  = module.database.db_password_ssm_name
   assets_bucket_name    = module.database.assets_bucket_name
 }
+
+module "serverless" {
+  source = "../../modules/serverless"
+
+  project_name      = var.project_name
+  owner_tag         = var.owner_tag
+}
