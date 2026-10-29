@@ -1,0 +1,14 @@
+{
+  "scripts/_terraform_cleanup.py": "0459c002f9cfb93d47c699bcae3210eb978bfe7270d9b696e1a0ea69b6b56111",
+  "scripts/terraform.py": "41ae3909beeabe6647a18b9cbdc43876a7f6a870e337dcc933a7eb862e5ee6d8",
+  "tests/live_cleanup.py": "4a3e16d3fa067f74a543d30ad96b1ef8a3d1bad8198857591d780f950bbc3606",
+  "tests/test_cleanup.py": "ca97b831a55a9fd212ca870c5353dba328bc90dee3ae6f0f608fff56f9d408b3",
+  "tests/test_terraform.py": "a5e7a78ec1261030cf2c910b6e0f350707441764842b5e203153f9a6c8c030d5",
+  "tests/fixtures/cleanup/main.tf": "0abb1adce0502f86a4e40a799135a8eba47b555d56d2556df8ab76756cf6b647",
+  "tests/fixtures/cleanup/messaging/main.tf": "e0d4ccdb87680bf4cafa24c3c8b4c51bd0a4dbb93b01e5b82c6c56f430835093",
+  "envs/vm-based/.terraform.lock.hcl": "07a45130eaac1a421ebf885a298b8ddb9f1ae23b9ff7320a3f259dcf6d807821",
+  "ops/iam/vitalora-deployment-1.json": "a5a7247811be99fa42a1396c9e5101055c3899e70637a2be100398192dbc73e9",
+  "ops/iam/vitalora-deployment-2.json": "5e7c594cd1001ee90acd4372a9a51fb2b3fb3c2f0847782dd972905449be6589",
+  "ops/iam/vitalora-deployment-3.json": "1e38251c327065ae8ac65d5abd80d8d4f5ff459058108b89e50d2f5706c876cb",
+  "ops/iam/vitalora-monitoring.json": "13ab8ae1ef55c5ac920b872648f4798be425a1e1bd48ab7bfc04db65a7a8a66b"
+}

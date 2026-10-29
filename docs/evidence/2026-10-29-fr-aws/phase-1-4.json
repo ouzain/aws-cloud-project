@@ -1,0 +1,67 @@
+{
+  "verified_at": "2026-10-29T17:15:59Z",
+  "phases": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "product_counts": {
+    "wellness": 10,
+    "sports-nutrition": 10,
+    "botanicals": 10,
+    "beauty": 10
+  },
+  "order": {
+    "order_id": 1,
+    "customer_email": "verification@example.com",
+    "status": "shipped",
+    "total_cents": 9960,
+    "created_at": "2026-10-29T17:15:42.000Z",
+    "items": [
+      {
+        "product_id": 1,
+        "name": "Magn\u00e9sium marin",
+        "qty": 2,
+        "unit_price_cents": 1690
+      },
+      {
+        "product_id": 7,
+        "name": "Cr\u00e9atine monohydrate",
+        "qty": 2,
+        "unit_price_cents": 3290
+      }
+    ],
+    "history": [
+      {
+        "status": "received",
+        "created_at": "2026-10-29T17:15:42.728Z"
+      },
+      {
+        "status": "confirmed",
+        "created_at": "2026-10-29T17:15:44.375Z"
+      },
+      {
+        "status": "processing",
+        "created_at": "2026-10-29T17:15:44.435Z"
+      },
+      {
+        "status": "shipped",
+        "created_at": "2026-10-29T17:15:45.950Z"
+      }
+    ]
+  },
+  "direct_database_check": {
+    "order": {
+      "order_id": 1,
+      "status": "shipped",
+      "total_cents": 9960
+    },
+    "item_count": 2,
+    "event_published": true
+  },
+  "log_groups": [
+    "/vitalora/application",
+    "/aws/lambda/vitalora-order-processor"
+  ]
+}

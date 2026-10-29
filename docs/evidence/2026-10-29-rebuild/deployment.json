@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-29T14:21:08.892585+00:00",
+  "completed_at": "2026-10-29T14:33:53.905930+00:00",
+  "account": "573199225243",
+  "region": "eu-west-3",
+  "actor": "arn:aws:iam::573199225243:user/vitalora/vitalora-deployer",
+  "started_with_empty_application_state": true,
+  "full_verification_passed": true,
+  "application_url": "http://vitalora-alb-801781567.eu-west-3.elb.amazonaws.com/",
+  "retained_account_baseline": [
+    "IAM deployment permissions",
+    "Terraform backend",
+    "any pre-existing project audit trail and budget"
+  ]
+}

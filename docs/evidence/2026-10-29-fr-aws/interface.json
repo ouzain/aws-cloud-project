@@ -1,0 +1,49 @@
+{
+  "verifie_le": "2026-10-29T17:17:28.072476+00:00",
+  "url": "http://vitalora-alb-684427277.eu-west-3.elb.amazonaws.com",
+  "html_et_javascript_identiques_aux_sources": true,
+  "produits_francais": 40,
+  "commande_navigateur": {
+    "order_id": 3,
+    "customer_email": "verification@example.com",
+    "status": "shipped",
+    "total_cents": 4980,
+    "created_at": "2026-10-29T17:16:53.000Z",
+    "items": [
+      {
+        "product_id": 1,
+        "name": "Magnésium marin",
+        "qty": 1,
+        "unit_price_cents": 1690
+      },
+      {
+        "product_id": 7,
+        "name": "Créatine monohydrate",
+        "qty": 1,
+        "unit_price_cents": 3290
+      }
+    ],
+    "history": [
+      {
+        "status": "received",
+        "created_at": "2026-10-29T17:16:53.246Z"
+      },
+      {
+        "status": "confirmed",
+        "created_at": "2026-10-29T17:16:55.337Z"
+      },
+      {
+        "status": "processing",
+        "created_at": "2026-10-29T17:16:55.359Z"
+      },
+      {
+        "status": "shipped",
+        "created_at": "2026-10-29T17:16:56.873Z"
+      }
+    ]
+  },
+  "montant_affiche": "49,80 €",
+  "statut_affiche": "Expédiée",
+  "capture": "checkout.jpg",
+  "simulation_locale": false
+}

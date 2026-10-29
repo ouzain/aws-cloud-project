@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-10-29T15:23:28.530401+00:00",
+  "scope": "same-account application rebuild",
+  "terraform_creation_plan": {
+    "create": 96,
+    "update": 0,
+    "delete": 0
+  },
+  "application_tests_passed": 9,
+  "governance_ownership_tests_passed": 4,
+  "new_browser_rehearsal": "blocked by automatic approval review usage limit",
+  "independent_accounts_verified": 0,
+  "sha256": {
+    ".build/runtime.zip": "f8d25ee01f020f1dd7c9c1ec6eafa5624fd840f8c46d10f814f1705e51bfb387",
+    "app/package-lock.json": "72a3a0b4f119fd3d72a965aa690de53baac70892e8116b0e6342a6b02a19294c",
+    "envs/vm-based/.terraform.lock.hcl": "07a45130eaac1a421ebf885a298b8ddb9f1ae23b9ff7320a3f259dcf6d807821"
+  }
+}

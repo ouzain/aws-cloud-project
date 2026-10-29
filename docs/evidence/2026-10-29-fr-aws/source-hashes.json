@@ -1,0 +1,7 @@
+{
+  "app/public/index.html": "aa09942f46904f437c6cae10e3b99d91a5f31b41bea88bf46786a0a9598f9035",
+  "app/public/app.js": "8c3a2340111a5172527f832cb6d1f359737fb8b678170ed739581586794869a1",
+  "catalog/products.json": "e35f23be5d4eef132ee4fc2dd005a932730e9302e0320179ab3d3579a8de7671",
+  "scripts/_terraform_cleanup.py": "0459c002f9cfb93d47c699bcae3210eb978bfe7270d9b696e1a0ea69b6b56111",
+  "scripts/terraform.py": "41ae3909beeabe6647a18b9cbdc43876a7f6a870e337dcc933a7eb862e5ee6d8"
+}

@@ -1,0 +1,28 @@
+{
+  "verifie_le": "2026-10-29T16:46:33.752238+00:00",
+  "tests_python": 21,
+  "controles": [
+    {
+      "commande": "python3 -B -m unittest discover -s tests -p test_*.py",
+      "code_retour": 0,
+      "sortie": ".....................\n----------------------------------------------------------------------\nRan 21 tests in 0.005s\n\nOK"
+    },
+    {
+      "commande": "python3 -B -O -m unittest discover -s tests -p test_*.py",
+      "code_retour": 0,
+      "sortie": ".....................\n----------------------------------------------------------------------\nRan 21 tests in 0.005s\n\nOK"
+    },
+    {
+      "commande": "/tmp/vitalora-toolchain/terraform fmt -check -recursive tests/fixtures/cleanup",
+      "code_retour": 0,
+      "sortie": ""
+    },
+    {
+      "commande": "git diff --check",
+      "code_retour": 0,
+      "sortie": ""
+    }
+  ],
+  "syntaxe_python": "PASS",
+  "portee": "Contrôles de récupération, garde-fous et entrée publique, sans connexion AWS."
+}
