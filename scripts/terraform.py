@@ -86,20 +86,22 @@ def initialize_backend(profile, region, account, binary, environment):
         if region != 'us-east-1':
             arguments += ['--create-bucket-configuration', f'LocationConstraint={region}']
         aws(profile, *arguments)
-        aws(profile, 's3api', 'put-bucket-versioning', '--bucket', bucket,
-            '--versioning-configuration', 'Status=Enabled')
-        aws(profile, 's3api', 'put-public-access-block', '--bucket', bucket,
-            '--public-access-block-configuration',
-            'BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true')
-        aws(profile, 's3api', 'put-bucket-encryption', '--bucket', bucket,
-            '--server-side-encryption-configuration',
-            '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}')
+    # Reprendre aussi une initialisation interrompue après la création du bucket.
+    aws(profile, 's3api', 'put-bucket-versioning', '--bucket', bucket,
+        '--versioning-configuration', 'Status=Enabled')
+    aws(profile, 's3api', 'put-public-access-block', '--bucket', bucket,
+        '--public-access-block-configuration',
+        'BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true')
+    aws(profile, 's3api', 'put-bucket-encryption', '--bucket', bucket,
+        '--server-side-encryption-configuration',
+        '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}')
     subprocess.run([binary, 'init', '-input=false', '-no-color', '-reconfigure',
         f'-backend-config=bucket={bucket}', '-backend-config=key=hybrid/terraform.tfstate',
         f'-backend-config=region={region}', '-backend-config=encrypt=true', '-backend-config=use_lockfile=true'],
         cwd=ENVIRONMENT, env=environment, check=True)
     managed = state_addresses(binary, ENVIRONMENT, environment)
-    trails = json.loads(aws(profile, 'cloudtrail', 'describe-trails', '--region', region))['trailList']
+    trails = json.loads(aws(profile, 'cloudtrail', 'describe-trails', '--no-include-shadow-trails',
+        '--region', region))['trailList']
     budgets = json.loads(aws(profile, 'budgets', 'describe-budgets', '--account-id', account, '--region', 'us-east-1'))['Budgets']
     names = governance_settings(trails, budgets, managed)
     (ENVIRONMENT / 'governance.auto.tfvars.json').write_text(json.dumps(names, indent=2) + '\n')
@@ -150,6 +152,8 @@ def main():
         source_environment['AWS_SHARED_CREDENTIALS_FILE'] = options.source_credentials
         raise SystemExit(subprocess.run(['aws', '--profile', options.profile, 'configure',
             'export-credentials', '--format', 'process'], env=source_environment).returncode)
+    if options.region != 'eu-west-3':
+        raise RuntimeError('Région prise en charge par cette démonstration : eu-west-3.')
     if not arguments:
         parser.error("Indiquer une commande Terraform, par exemple plan, apply, output ou destroy.")
     if arguments[0] in ['apply', 'destroy', 'import']:

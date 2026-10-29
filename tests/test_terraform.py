@@ -45,6 +45,32 @@ class GovernanceOwnershipTests(unittest.TestCase):
 
 
 class FreshStateTests(unittest.TestCase):
+    def test_new_account_init_uses_own_backend_and_can_resume_bucket_setup(self):
+        for bucket_exists in [False, True]:
+            with self.subTest(bucket_exists=bucket_exists), tempfile.TemporaryDirectory() as directory:
+                account = '123456789012'
+                bucket = f'tfstate-vitalora-{account}-eu-west-3'
+                calls = []
+                def aws(profile, *arguments):
+                    calls.append(arguments)
+                    if arguments[:2] == ('s3api', 'list-buckets'):
+                        return json.dumps({'Buckets': [{'Name': bucket}] if bucket_exists else []})
+                    if arguments[:2] == ('cloudtrail', 'describe-trails'):
+                        return '{"trailList":[]}'
+                    if arguments[:2] == ('budgets', 'describe-budgets'):
+                        return '{"Budgets":[]}'
+                    return '{}'
+                with patch.object(helper, 'ENVIRONMENT', Path(directory)), \
+                        patch.object(helper, 'aws', side_effect=aws), \
+                        patch.object(helper, 'state_addresses', return_value=[]), \
+                        patch.object(helper.subprocess, 'run') as execute:
+                    helper.initialize_backend('team', 'eu-west-3', account, 'terraform', {})
+                self.assertIn(f'-backend-config=bucket={bucket}', execute.call_args.args[0])
+                for action in ['put-bucket-versioning', 'put-public-access-block', 'put-bucket-encryption']:
+                    self.assertTrue(any(args[:2] == ('s3api', action) for args in calls))
+                config = json.loads((Path(directory) / 'governance.auto.tfvars.json').read_text())
+                self.assertEqual(config, {'existing_audit_trail_name': None, 'existing_budget_name': None})
+
     def test_public_state_list_accepts_first_deployment_without_creating_resources(self):
         with tempfile.TemporaryDirectory() as directory:
             environment = Path(directory)
