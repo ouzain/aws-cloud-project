@@ -1,0 +1,16 @@
+{
+  "scripts/bootstrap.py": "0d8865b6b47302901b7feafd8c51fdac2ecd3df59da6c2b88f2d1cd2ce70cd54",
+  "scripts/_audit.py": "79b705096edef8855ebda7f37c82488ea74a4ea4d0aa7c7388ef11ffd550593e",
+  "scripts/deploy.py": "1ae5f9984fce19849571d315c7bbaebf50a23df016ffc9b24133793057693c9a",
+  "scripts/terraform.py": "24f6d9a404ef3a9b4d0601ab7061bed8422625bc6b1be4bce00d3fbfec72e3b7",
+  "scripts/verify.py": "8186507704a162ab41af413fec2f757c94db4e2a35a72c85b5f55e100c7741a4",
+  "scripts/verify-monitoring.py": "31d3c1ee38c0e01718c44ba7f6519721c3f00fdd60074813b06cdc609be835fd",
+  "tests/test_bootstrap.py": "648ed76fe4bca56eb17d2ff263c019c203c8fdf9ae6c2b33c4575877c20568c0",
+  "tests/test_audit.py": "c490fde5fb9389f40e22bc1c2e8e731139a72962706f7c2628b4cb3db7d6c059",
+  "tests/test_terraform.py": "f8492ef169e5027109a66dcf38b679c6ce0fe7ee688424d19cda2d7ed06c5470",
+  "ops/iam/templates/vitalora-deployment-1.json": "f1fb3ce785a0e8197f97dc94931eb21d69a25a75f18e375254390ca701f8550c",
+  "ops/iam/templates/vitalora-deployment-2.json": "b1b2baf13e515e72160e8b9806adaf1c7102ef0bc52fb64f8c2ace714e0aa012",
+  "ops/iam/templates/vitalora-deployment-3.json": "b60f1ee9458fa7cb412c588563c167691537f8c28f0535ecd16c9193b2259fc6",
+  "ops/iam/templates/vitalora-governance.json": "d13ecfb0f626edfed50c3a50d7be84128f339a2fd010c69f234715f3ceb9c42a",
+  "ops/iam/templates/vitalora-monitoring.json": "2ab71cb6b6c5b46d70ba5fc154c260fc663db3228db9e9df80f5be9204478e68"
+}

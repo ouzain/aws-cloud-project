@@ -97,7 +97,7 @@ temporisé de redirection SQS. Aucun e-mail d’alarme n’est configuré. L’e
 confirmation SNS est facultatif et nécessite une adresse confirmée.
 
 CloudTrail enregistre les événements de gestion avec validation des fichiers.
-Le compte actuel réutilise l’audit et le budget préexistants. Un compte préparé
+Un audit et un budget préexistants peuvent être réutilisés. Un compte préparé
 sans ce socle peut les créer avec le module de supervision, les permissions
 correspondantes et une adresse de notification budgétaire.
 
@@ -137,24 +137,11 @@ contrôles de sécurité ont vérifié chiffrement, confidentialité, livraison 
 abonnements budgétaires et vraie alarme. Les plans après recompilation et
 réinitialisation ne signalaient aucun changement.
 
-Après suppression complète du premier environnement, une seconde exécution en
-une commande a créé 96 ressources, sans mise à jour ni suppression dans le plan,
-le 29 octobre 2026 de 14:21 à 14:33 UTC. La commande 1 a atteint `shipped` avec
-lecture RDS et journaux vérifiés ; l’injection a de nouveau produit `ALARM`.
-Le second environnement a ensuite été entièrement supprimé. L’état vide et
-l’absence des ressources applicatives ont été confirmés.
-
-Voir les [preuves initiales](evidence/2026-10-29/README.md), les
-[preuves de reconstruction](evidence/2026-10-29-rebuild/README.md) et
-[l’état du projet](../PROJECT_STATUS.md). Seul le compte `573199225243` dans
-`eu-west-3` a été testé. La répétabilité dans le même compte est démontrée ;
-les comptes indépendants ne le sont pas. Le second environnement n’a pas sa
-propre capture de navigateur.
-
-Le passage au français est postérieur à ces tests AWS. Les JSON et captures
-historiques conservent leurs contenus et leur langue d’origine. Les contrôles
-locaux de traduction et un aperçu français sont des vérifications distinctes,
-sans nouveau déploiement AWS ni réécriture des anciennes preuves.
+Les résultats et les limites propres à chaque exécution sont conservés
+dans [les preuves de validation](evidence/2026-10-29-fr-aws/README.md).
+Les [contrôles de portabilité](evidence/2026-10-29-portability/README.md)
+couvrent les modèles IAM, les erreurs de premier déploiement et une copie
+source neuve. Ils ne certifient pas le déploiement dans tous les comptes.
 
 ## Reproduction et soutenance
 

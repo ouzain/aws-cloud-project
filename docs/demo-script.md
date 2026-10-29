@@ -6,8 +6,8 @@ Durée cible : 8 à 10 minutes. Utiliser des données fictives et la région
 ## Préparation
 
 ```sh
-python3 scripts/deploy.py --profile vitalora --yes --verify
-python3 scripts/terraform.py --profile vitalora output
+python3 scripts/deploy.py --profile TEAM_PROFILE --yes --verify
+python3 scripts/terraform.py --profile TEAM_PROFILE output
 ```
 
 L’option de validation crée des commandes fictives et injecte une erreur de
@@ -32,7 +32,7 @@ Lambda. Attendre le rétablissement de l’alarme avant de la déclencher en dir
 Pour une vérification automatisée avec lecture directe de RDS :
 
 ```sh
-python3 scripts/verify.py --profile vitalora
+python3 scripts/verify.py --profile TEAM_PROFILE
 ```
 
 Ce script crée sa propre commande fictive. Utiliser son identifiant enregistré
@@ -47,7 +47,7 @@ Le traitement utilise `/aws/lambda/vitalora-order-processor`, l’application
 Pour démontrer une vraie alarme :
 
 ```sh
-python3 scripts/verify-monitoring.py --profile vitalora
+python3 scripts/verify-monitoring.py --profile TEAM_PROFILE
 ```
 
 L’enregistrement invalide déclenche une réponse partielle en échec et une
@@ -60,8 +60,8 @@ RDS et CloudWatch documentent les commandes.
 Conserver les preuves puis supprimer l’environnement :
 
 ```sh
-python3 scripts/terraform.py --profile vitalora destroy
-python3 scripts/terraform.py --profile vitalora state list
+python3 scripts/terraform.py --profile TEAM_PROFILE destroy
+python3 scripts/terraform.py --profile TEAM_PROFILE state list
 ```
 
 Attendre `Destroy complete` et un état applicatif vide. L’interface réseau
