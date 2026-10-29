@@ -1,16 +1,14 @@
-# Copie ce fichier en "terraform.tfvars" (gitignored) et adapte les valeurs.
-
-aws_region   = "eu-west-3"
-aws_profile  = "default"   # celui créé avec `aws configure --profile default`
+# Utiliser scripts/terraform.py --profile vitalora avec les identifiants temporaires.
+aws_region = "eu-west-3"
+aws_profile = ""
 project_name = "vitalora"
-owner_tag    = "ousmane"            # ton prénom
-
-admin_cidr = "46.193.65.70/32"         # Trouve ton IP publique sur whatismyip.com ou avec `curl -4 ifconfig.me`, puis remplace cette valeur par ton IP suivie de /32.
-
+owner_tag = "team"
 instance_type = "t3.micro"
-key_name      = null              # ou le nom d'une key pair EC2 existante si tu veux du SSH
-
-
-# Phase 4 : e-mail recevant 1 notification par étape de traitement (optionnel). Un mail de confirmation
-# d'abonnement AWS est envoyé après apply : clique sur le lien pour l'activer.
-notification_email = "ouzaindiapazon@gmail.com"         
+desired_capacity = 1
+# SSH est désactivé. Utiliser Systems Manager pour les vérifications.
+admin_cidr = null
+key_name = null
+# Facultatif : indiquer votre adresse et confirmer l’abonnement SNS.
+notification_email = null
+# Requis en l’absence de budget VITALORA préexistant.
+# budget_alert_email = "votre-adresse@example.com"

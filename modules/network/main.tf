@@ -1,186 +1,116 @@
-# ---------------------------------------------------------------------------
-# VPC
-# ---------------------------------------------------------------------------
-# Choix budgétaire volontaire : pas de NAT Gateway (jamais couvert par le Free
-# Tier, facturé à l'heure + au Go — voir la section "Gouvernance budgétaire"
-# du roadmap). L'EC2 vit donc dans un subnet PUBLIC, protégé uniquement par
-# son Security Group (ingress HTTP depuis l'ALB, SSH depuis mon IP). RDS reste
-# dans un subnet PRIVÉ, inatteignable depuis Internet.
-
+data "aws_availability_zones" "available" { state = "available" }
+locals { azs = slice(data.aws_availability_zones.available.names, 0, 2) }
 resource "aws_vpc" "this" {
-  cidr_block           = var.vpc_cidr
+  cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
-
-  tags = {
-    Name  = "${var.project_name}-vpc"
-    Owner = var.owner_tag
-  }
+  tags                 = { Name = "${var.project_name}-vpc" }
 }
-
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
-
-  tags = {
-    Name  = "${var.project_name}-igw"
-    Owner = var.owner_tag
-  }
+  tags   = { Name = "${var.project_name}-igw" }
 }
-
-# --- Subnets publics (ALB + EC2) --------------------------------------------
-
 resource "aws_subnet" "public" {
-  count                   = length(var.azs)
+  count                   = 2
   vpc_id                  = aws_vpc.this.id
-  cidr_block              = var.public_subnet_cidrs[count.index]
-  availability_zone       = var.azs[count.index]
+  cidr_block              = "10.0.${count.index + 1}.0/24"
+  availability_zone       = local.azs[count.index]
   map_public_ip_on_launch = true
-
-  tags = {
-    Name  = "${var.project_name}-public-${var.azs[count.index]}"
-    Owner = var.owner_tag
-    Tier  = "public"
-  }
+  tags                    = { Name = "${var.project_name}-public-${count.index + 1}", Tier = "public" }
 }
-
+resource "aws_subnet" "private" {
+  count             = 2
+  vpc_id            = aws_vpc.this.id
+  cidr_block        = "10.0.${count.index + 11}.0/24"
+  availability_zone = local.azs[count.index]
+  tags              = { Name = "${var.project_name}-private-${count.index + 1}", Tier = "private" }
+}
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.this.id
   }
-
-  tags = {
-    Name  = "${var.project_name}-public-rt"
-    Owner = var.owner_tag
-  }
+  tags = { Name = "${var.project_name}-public-routes" }
 }
-
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.this.id
+  tags   = { Name = "${var.project_name}-private-routes" }
+}
 resource "aws_route_table_association" "public" {
-  count          = length(aws_subnet.public)
+  count          = 2
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
-
-# --- Subnets privés (RDS uniquement) ----------------------------------------
-
-resource "aws_subnet" "private" {
-  count             = length(var.azs)
-  vpc_id            = aws_vpc.this.id
-  cidr_block        = var.private_subnet_cidrs[count.index]
-  availability_zone = var.azs[count.index]
-
-  tags = {
-    Name  = "${var.project_name}-private-${var.azs[count.index]}"
-    Owner = var.owner_tag
-    Tier  = "private"
-  }
-}
-
-# Table de routage locale uniquement (pas de 0.0.0.0/0, pas de NAT) : ces
-# subnets n'ont aucune route vers Internet, par construction.
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.this.id
-
-  tags = {
-    Name  = "${var.project_name}-private-rt"
-    Owner = var.owner_tag
-  }
-}
-
 resource "aws_route_table_association" "private" {
-  count          = length(aws_subnet.private)
+  count          = 2
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
 }
-
-# ---------------------------------------------------------------------------
-# Security Groups — moindre privilège, chaînés entre eux
-# ---------------------------------------------------------------------------
-
+# L’API EC2 impose des caractères ASCII dans les descriptions de groupes.
 resource "aws_security_group" "alb" {
   name        = "${var.project_name}-alb-sg"
-  description = "ALB : HTTP public uniquement"
+  description = "Entree HTTP publique"
   vpc_id      = aws_vpc.this.id
-
   ingress {
-    description = "HTTP depuis Internet"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "${var.project_name}-alb-sg"
-    Owner = var.owner_tag
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.this.cidr_block]
   }
 }
-
 resource "aws_security_group" "ec2" {
   name        = "${var.project_name}-ec2-sg"
-  description = "EC2 : HTTP depuis ALB uniquement + SSH depuis IP admin"
+  description = "HTTP applicatif depuis ALB et SSH administrateur facultatif"
   vpc_id      = aws_vpc.this.id
-
   ingress {
-    description     = "HTTP depuis ALB"
     from_port       = 3000
     to_port         = 3000
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
-
-  ingress {
-    description = "SSH depuis IP admin"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.admin_cidr]
+  dynamic "ingress" {
+    for_each = var.admin_cidr == null ? [] : [var.admin_cidr]
+    content {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
   }
-
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Name  = "${var.project_name}-ec2-sg"
-    Owner = var.owner_tag
-  }
 }
-
+resource "aws_security_group" "worker" {
+  name        = "${var.project_name}-worker-sg"
+  description = "Acces prive a la base pour Lambda"
+  vpc_id      = aws_vpc.this.id
+}
 resource "aws_security_group" "rds" {
   name        = "${var.project_name}-rds-sg"
-  description = "RDS : accessible uniquement depuis EC2"
+  description = "Acces MySQL depuis EC2 et Lambda"
   vpc_id      = aws_vpc.this.id
-
   ingress {
-    description     = "MySQL depuis EC2"
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.ec2.id]
+    security_groups = [aws_security_group.ec2.id, aws_security_group.worker.id]
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "${var.project_name}-rds-sg"
-    Owner = var.owner_tag
-  }
+}
+resource "aws_vpc_security_group_egress_rule" "worker_database" {
+  security_group_id            = aws_security_group.worker.id
+  referenced_security_group_id = aws_security_group.rds.id
+  ip_protocol                  = "tcp"
+  from_port                    = 3306
+  to_port                      = 3306
 }
