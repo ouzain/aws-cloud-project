@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -24,7 +25,7 @@ def main():
         return json.loads(subprocess.check_output(['aws', '--profile', options.profile,
             '--region', options.region, *arguments, '--output', 'json'], text=True))
 
-    raw = subprocess.check_output(['python3', str(ROOT / 'scripts/terraform.py'),
+    raw = subprocess.check_output([sys.executable, str(ROOT / 'scripts/terraform.py'),
         '--profile', options.profile, '--region', options.region, 'output', '-json'], text=True)
     outputs = {key: item['value'] for key, item in json.loads(raw).items()}
     base = 'http://' + outputs['alb_dns_name']

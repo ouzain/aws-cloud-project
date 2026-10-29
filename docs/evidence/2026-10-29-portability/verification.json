@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-29T22:31:04.025592+00:00",
+  "statut": "Contrôles locaux réussis ; second compte AWS non vérifié.",
+  "tests_python": 34,
+  "tests_node": 9,
+  "validation_iam": {
+    "methode": "AWS Access Analyzer ValidatePolicy, cinq modèles résolus",
+    "politiques": 5,
+    "erreurs": 0,
+    "alertes_securite": 0,
+    "permissions_attachees": false
+  },
+  "dossier_neuf": {
+    "resultat": "PASS",
+    "portee": "Dossier neuf sans état, paramètres privés ou identifiants AWS ; même machine physique.",
+    "controles": [
+      {
+        "commande": [
+          "node",
+          "scripts/build.mjs"
+        ],
+        "code_retour": 0
+      },
+      {
+        "commande": [
+          "node",
+          "--test",
+          "tests/pipeline.test.js"
+        ],
+        "code_retour": 0
+      },
+      {
+        "commande": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_*.py"
+        ],
+        "code_retour": 0
+      },
+      {
+        "commande": [
+          "python3",
+          "-B",
+          "scripts/bootstrap.py",
+          "--account-id",
+          "ACCOUNT_ID"
+        ],
+        "code_retour": 0
+      },
+      {
+        "commande": [
+          "terraform",
+          "init",
+          "-backend=false",
+          "-input=false",
+          "-no-color"
+        ],
+        "code_retour": 0
+      },
+      {
+        "commande": [
+          "terraform",
+          "validate",
+          "-no-color"
+        ],
+        "code_retour": 0
+      }
+    ]
+  }
+}

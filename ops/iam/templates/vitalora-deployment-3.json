@@ -19,11 +19,11 @@
         "sqs:UntagQueue"
       ],
       "Resource": [
-        "arn:aws:sqs:eu-west-3:573199225243:vitalora-*"
+        "arn:aws:sqs:${REGION}:${ACCOUNT_ID}:vitalora-*"
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -34,12 +34,12 @@
         "ssm:SendCommand"
       ],
       "Resource": [
-        "arn:aws:ec2:eu-west-3:573199225243:instance/*"
+        "arn:aws:ec2:${REGION}:${ACCOUNT_ID}:instance/*"
       ],
       "Condition": {
         "StringEquals": {
           "ssm:resourceTag/Project": "vitalora",
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -50,7 +50,7 @@
         "ssm:SendCommand"
       ],
       "Resource": [
-        "arn:aws:ssm:eu-west-3::document/AWS-RunShellScript"
+        "arn:aws:ssm:${REGION}::document/AWS-RunShellScript"
       ]
     },
     {
@@ -69,7 +69,7 @@
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -85,11 +85,11 @@
         "ssm:RemoveTagsFromResource"
       ],
       "Resource": [
-        "arn:aws:ssm:eu-west-3:573199225243:parameter/vitalora/*"
+        "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/vitalora/*"
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -106,7 +106,7 @@
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -117,7 +117,7 @@
         "iam:PassRole"
       ],
       "Resource": [
-        "arn:aws:iam::573199225243:role/vitalora-*"
+        "arn:aws:iam::${ACCOUNT_ID}:role/vitalora-*"
       ],
       "Condition": {
         "StringEquals": {
@@ -135,7 +135,7 @@
         "iam:CreateServiceLinkedRole"
       ],
       "Resource": [
-        "arn:aws:iam::573199225243:role/aws-service-role/*"
+        "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/*"
       ],
       "Condition": {
         "StringEquals": {

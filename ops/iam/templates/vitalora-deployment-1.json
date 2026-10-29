@@ -15,7 +15,7 @@
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -38,11 +38,11 @@
         "autoscaling:UpdateAutoScalingGroup"
       ],
       "Resource": [
-        "arn:aws:autoscaling:eu-west-3:573199225243:autoScalingGroup:*:autoScalingGroupName/vitalora-*"
+        "arn:aws:autoscaling:${REGION}:${ACCOUNT_ID}:autoScalingGroup:*:autoScalingGroupName/vitalora-*"
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -59,7 +59,7 @@
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -132,7 +132,7 @@
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -154,7 +154,7 @@
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -182,13 +182,13 @@
         "elasticloadbalancing:SetSubnets"
       ],
       "Resource": [
-        "arn:aws:elasticloadbalancing:eu-west-3:573199225243:loadbalancer/app/vitalora-*/*",
-        "arn:aws:elasticloadbalancing:eu-west-3:573199225243:targetgroup/vitalora-*/*",
-        "arn:aws:elasticloadbalancing:eu-west-3:573199225243:listener/app/vitalora-*/*/*"
+        "arn:aws:elasticloadbalancing:${REGION}:${ACCOUNT_ID}:loadbalancer/app/vitalora-*/*",
+        "arn:aws:elasticloadbalancing:${REGION}:${ACCOUNT_ID}:targetgroup/vitalora-*/*",
+        "arn:aws:elasticloadbalancing:${REGION}:${ACCOUNT_ID}:listener/app/vitalora-*/*/*"
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     },
@@ -235,8 +235,8 @@
         "iam:UpdateAssumeRolePolicy"
       ],
       "Resource": [
-        "arn:aws:iam::573199225243:role/vitalora-*",
-        "arn:aws:iam::573199225243:instance-profile/vitalora-*"
+        "arn:aws:iam::${ACCOUNT_ID}:role/vitalora-*",
+        "arn:aws:iam::${ACCOUNT_ID}:instance-profile/vitalora-*"
       ]
     },
     {
@@ -251,7 +251,7 @@
       ],
       "Condition": {
         "StringEquals": {
-          "aws:RequestedRegion": "eu-west-3"
+          "aws:RequestedRegion": "${REGION}"
         }
       }
     }

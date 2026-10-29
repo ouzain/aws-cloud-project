@@ -4,6 +4,7 @@ import argparse
 import datetime
 import json
 import os
+import platform
 from pathlib import Path
 import shutil
 import subprocess
@@ -33,8 +34,22 @@ def main():
     parser.add_argument('--verify', action='store_true', help="Vérifier la chaîne de commande et injecter une erreur de supervision contrôlée.")
     parser.add_argument('--require-empty', action='store_true', help="Exiger un état applicatif vide avant le déploiement.")
     parser.add_argument('--plan-only', action='store_true', help="Compiler et valider le plan sans déployer l’application.")
+    parser.add_argument('--budget-alert-email', help='Adresse du propriétaire pour le budget créé dans un compte neuf.')
     options = parser.parse_args()
     os.umask(0o077)
+    if platform.system() == 'Windows':
+        raise RuntimeError('Utiliser Ubuntu sous WSL2 pour le déploiement depuis Windows.')
+    if options.region != 'eu-west-3':
+        raise RuntimeError('Région prise en charge : eu-west-3.')
+    for executable in ['aws', 'node', 'npm']:
+        if not shutil.which(executable):
+            raise RuntimeError('Installer le prérequis manquant : ' + executable)
+    if int(run(['node', '-p', 'process.versions.node.split(".")[0]'], capture=True).strip()) < 22:
+        raise RuntimeError('Installer Node.js 22 ou ultérieur.')
+    if options.budget_alert_email:
+        if '@' not in options.budget_alert_email or '\n' in options.budget_alert_email:
+            raise RuntimeError('Adresse de notification budgétaire invalide.')
+        os.environ['TF_VAR_budget_alert_email'] = options.budget_alert_email
     started = datetime.datetime.now(datetime.timezone.utc)
     identity = json.loads(run(['aws', '--profile', options.profile, '--region', options.region,
         'sts', 'get-caller-identity', '--output', 'json'], capture=True))
@@ -70,8 +85,11 @@ def main():
     hostname = run(terraform + ['output', '-raw', 'alb_dns_name'], capture=True).strip()
     if options.verify:
         for script in ['verify.py', 'verify-monitoring.py']:
-            run([sys.executable, str(ROOT / 'scripts' / script),
-                '--profile', options.profile, '--region', options.region])
+            command = [sys.executable, str(ROOT / 'scripts' / script),
+                '--profile', options.profile, '--region', options.region]
+            if script == 'verify-monitoring.py':
+                command += ['--deployment-started-at', started.isoformat()]
+            run(command)
     else:
         print("Attente de la disponibilité du site et de la base…", flush=True)
         for attempt in range(120):

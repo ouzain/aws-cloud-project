@@ -2,14 +2,15 @@
 "Vérifier chiffrement, audit, budget et déclenchement réel d’une alarme."
 import argparse
 import datetime
-import gzip
 import json
 from pathlib import Path
 import subprocess
-import tempfile
+import sys
 import time
 import urllib.error
 import urllib.request
+
+from _audit import wait_for_audit_event
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,15 +21,21 @@ def main():
     parser.add_argument("-h", "--help", action="help", help="Afficher cette aide et quitter.")
     parser.add_argument('--profile', default='vitalora')
     parser.add_argument('--region', default='eu-west-3')
+    parser.add_argument('--deployment-started-at', help='Début du déploiement en ISO 8601 UTC.')
+    parser.add_argument('--audit-timeout', type=int, default=600)
     options = parser.parse_args()
+    since = (datetime.datetime.fromisoformat(options.deployment_started_at.replace('Z', '+00:00'))
+        if options.deployment_started_at else datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=2))
+    if since.tzinfo is None or not 0 <= options.audit_timeout <= 1800:
+        raise RuntimeError('Date avec fuseau et délai d’audit entre 0 et 1800 secondes requis.')
 
     def aws(*arguments):
         return json.loads(subprocess.check_output(['aws', '--profile', options.profile,
-            '--region', options.region, *arguments, '--output', 'json'], text=True))
+            '--region', 'us-east-1' if arguments[0] == 'budgets' else options.region, *arguments, '--output', 'json'], text=True))
 
     identity = aws('sts', 'get-caller-identity')
     assert not identity['Arn'].endswith(':root'), "Utiliser le profil IAM de déploiement pour la vérification."
-    outputs = json.loads(subprocess.check_output(['python3', str(ROOT / 'scripts/terraform.py'),
+    outputs = json.loads(subprocess.check_output([sys.executable, str(ROOT / 'scripts/terraform.py'),
         '--profile', options.profile, '--region', options.region, 'output', '-json'], text=True))
     outputs = {key: item['value'] for key, item in outputs.items()}
 
@@ -74,24 +81,8 @@ def main():
     # Ne conserver que les métadonnées de gestion utiles aux preuves.
     trails = aws('cloudtrail', 'describe-trails', '--trail-name-list', trail)['trailList']
     audit_bucket = trails[0]['S3BucketName']
-    date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y/%m/%d')
-    prefix = f'AWSLogs/{identity["Account"]}/CloudTrail/{options.region}/{date}/'
-    objects = aws('s3api', 'list-objects-v2', '--bucket', audit_bucket, '--prefix', prefix).get('Contents', [])
-    audit_event = None
-    with tempfile.TemporaryDirectory(prefix='vitalora-audit-') as directory:
-        for item in sorted(objects, key=lambda item: item['LastModified'], reverse=True)[:20]:
-            target = str(Path(directory) / 'record.json.gz')
-            aws('s3api', 'get-object', '--bucket', audit_bucket, '--key', item['Key'], target)
-            with gzip.open(target, 'rt') as handle:
-                records = json.load(handle)['Records']
-            match = next((event for event in records if event['eventName'].startswith(
-                ('CreateFunction', 'CreateDBInstance', 'CreateVpc', 'PutDashboard', 'PutMetricAlarm'))
-                and 'vitalora' in json.dumps(event.get('requestParameters', {})).lower()), None)
-            if match:
-                audit_event = {key: match[key] for key in ['eventTime', 'eventName', 'eventSource']}
-                audit_event['actor'] = match['userIdentity'].get('arn')
-                break
-    assert audit_event, "Aucun événement de gestion VITALORA livré n’a été trouvé."
+    audit_event = wait_for_audit_event(aws, audit_bucket, identity['Account'], options.region,
+        since, timeout=options.audit_timeout)
     print("OK : un événement CloudTrail livré identifie un changement d’infrastructure du projet.", flush=True)
 
     target = ROOT / 'test-results'

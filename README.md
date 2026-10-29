@@ -29,15 +29,22 @@ flowchart LR
   1.13.5 dans `.tools/` et vérifie sa somme de contrôle officielle.
 
 Les autorisations du compte doivent permettre la création et la suppression
-des ressources. Les politiques propres au compte actuel figurent dans
+des ressources. Les modèles de permissions paramétrés figurent dans
 [la documentation IAM](ops/iam/README.md).
 
 ## Déploiement en une commande
 
+Pour un nouveau compte et une machine neuve, suivre d’abord
+[le parcours de préparation](docs/new-account.md) : modèles IAM paramétrés,
+initialisation explicite par le propriétaire et adresse de budget.
+macOS/Linux sont pris en charge ; sous Windows, utiliser Ubuntu dans WSL2.
+Remplacer `TEAM_PROFILE`, `ACCOUNT_ID` et `OWNER_EMAIL` par vos valeurs.
+
 Depuis la racine du dépôt :
 
 ```sh
-python3 scripts/deploy.py --profile vitalora --yes --verify
+python3 scripts/deploy.py --profile TEAM_PROFILE --expect-account ACCOUNT_ID \
+  --budget-alert-email OWNER_EMAIL --yes --verify
 ```
 
 Le script compile l’application, exécute les tests locaux, initialise le stockage
@@ -62,11 +69,11 @@ Les étapes individuelles restent disponibles :
 node scripts/build.mjs
 npm test --prefix app
 python3 -m unittest discover -s tests -p 'test_*.py'
-python3 scripts/terraform.py --profile vitalora init
-python3 scripts/terraform.py --profile vitalora plan -out=deployment.tfplan
-python3 scripts/terraform.py --profile vitalora apply deployment.tfplan
-python3 scripts/verify.py --profile vitalora
-python3 scripts/verify-monitoring.py --profile vitalora
+python3 scripts/terraform.py --profile TEAM_PROFILE init
+python3 scripts/terraform.py --profile TEAM_PROFILE plan -out=deployment.tfplan
+python3 scripts/terraform.py --profile TEAM_PROFILE apply deployment.tfplan
+python3 scripts/verify.py --profile TEAM_PROFILE
+python3 scripts/verify-monitoring.py --profile TEAM_PROFILE
 ```
 
 Le script utilise des identifiants temporaires actualisables via AWS CLI. Cela
@@ -178,7 +185,7 @@ des crédits ou être facturés. Aucun montant final nul n’est certifié.
 ## Suppression de l’environnement
 
 ```sh
-python3 scripts/terraform.py --profile vitalora destroy
+python3 scripts/terraform.py --profile TEAM_PROFILE destroy
 ```
 
 Cette opération supprime l’application, la base et les images. Le stockage
@@ -190,26 +197,16 @@ confirmations demandées par les options Terraform et écrit un bilan sans secre
 dans `test-results/cleanup.json`. Une séance déjà approuvée peut utiliser
 `destroy -auto-approve`.
 
-## État du projet et livrables
+## Documentation et validation
 
-Les phases 1 à 5 ont passé les tests AWS dans le compte actuel. Une seconde
-création de 96 ressources, depuis un état applicatif vide, a aussi passé les
-contrôles. Les deux environnements ont été supprimés. Voir les
-[preuves initiales](docs/evidence/2026-10-29/README.md), les
-[preuves de reconstruction](docs/evidence/2026-10-29-rebuild/README.md) et
-[l’état du projet](PROJECT_STATUS.md). La reproduction dans d’autres comptes
-reste à vérifier.
+- [Nouveau compte et nouvelle machine](docs/new-account.md).
+- [Permissions de déploiement](ops/iam/README.md).
+- [Cycle de vie et dépannage](docs/reproducibility.md).
+- [Architecture](docs/architecture.md), [rapport](docs/project-report.md) et
+  [scénario de démonstration](docs/demo-script.md).
+- [État des fonctionnalités et limites](PROJECT_STATUS.md).
 
-Le [rapport](docs/project-report.md), les [schémas](docs/architecture.md), le
-[scénario de démonstration](docs/demo-script.md) et la présentation de soutenance
-sont en français. Les identifiants techniques et les preuves AWS historiques
-restent inchangés. La traduction n’équivaut pas à une nouvelle validation AWS.
-
-La [validation locale de la traduction](docs/evidence/2026-10-29-fr/README.md)
-regroupe les contrôles de langue et une capture française. Les descriptions des
-groupes EC2 utilisent le français sans accents pour respecter les
-[caractères autorisés par AWS](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html).
-
-La [validation française sur AWS](docs/evidence/2026-10-29-fr-aws/README.md)
-confirme désormais le catalogue français, une commande navigateur expédiée
-et les contrôles fonctionnels et de supervision dans le compte actuel.
+Les résultats sous `docs/evidence/` sont des preuves datées, avec le périmètre
+de chaque exécution. Ils ne sont pas des paramètres à copier dans un compte.
+Chaque utilisateur doit effectuer ses propres vérifications fonctionnelles,
+de suppression et de coût. Un plan valide ne remplace pas un test sur AWS.

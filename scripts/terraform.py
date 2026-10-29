@@ -61,6 +61,23 @@ def governance_settings(trails, budgets, managed_addresses):
     }
 
 
+def state_addresses(binary, directory, environment):
+    """Un stockage neuf n’a pas encore d’état ; une erreur d’accès reste bloquante."""
+    result = subprocess.run([binary, 'state', 'list', '-no-color'], cwd=directory,
+        env=environment, capture_output=True, text=True)
+    if result.returncode == 0:
+        return result.stdout.splitlines()
+    missing_state = (
+        'No state file was found! '
+        'State management commands require a state file. Run this command '
+        'in a directory where Terraform has been run or use the -state flag '
+        'to point the command to a specific state location.')
+    if (result.returncode == 1 and not result.stdout.strip()
+            and ' '.join(result.stderr.split()) == missing_state):
+        return []
+    raise RuntimeError(result.stderr.strip() or 'Impossible de lire l’état Terraform.')
+
+
 def initialize_backend(profile, region, account, binary, environment):
     bucket = f'tfstate-vitalora-{account}-{region}'
     buckets = json.loads(aws(profile, 's3api', 'list-buckets', '--output', 'json'))['Buckets']
@@ -69,21 +86,22 @@ def initialize_backend(profile, region, account, binary, environment):
         if region != 'us-east-1':
             arguments += ['--create-bucket-configuration', f'LocationConstraint={region}']
         aws(profile, *arguments)
-        aws(profile, 's3api', 'put-bucket-versioning', '--bucket', bucket,
-            '--versioning-configuration', 'Status=Enabled')
-        aws(profile, 's3api', 'put-public-access-block', '--bucket', bucket,
-            '--public-access-block-configuration',
-            'BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true')
-        aws(profile, 's3api', 'put-bucket-encryption', '--bucket', bucket,
-            '--server-side-encryption-configuration',
-            '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}')
+    # Reprendre aussi une initialisation interrompue après la création du bucket.
+    aws(profile, 's3api', 'put-bucket-versioning', '--bucket', bucket,
+        '--versioning-configuration', 'Status=Enabled')
+    aws(profile, 's3api', 'put-public-access-block', '--bucket', bucket,
+        '--public-access-block-configuration',
+        'BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true')
+    aws(profile, 's3api', 'put-bucket-encryption', '--bucket', bucket,
+        '--server-side-encryption-configuration',
+        '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}')
     subprocess.run([binary, 'init', '-input=false', '-no-color', '-reconfigure',
         f'-backend-config=bucket={bucket}', '-backend-config=key=hybrid/terraform.tfstate',
         f'-backend-config=region={region}', '-backend-config=encrypt=true', '-backend-config=use_lockfile=true'],
         cwd=ENVIRONMENT, env=environment, check=True)
-    managed = subprocess.check_output([binary, 'state', 'list'], cwd=ENVIRONMENT,
-        env=environment, text=True).splitlines()
-    trails = json.loads(aws(profile, 'cloudtrail', 'describe-trails', '--region', region))['trailList']
+    managed = state_addresses(binary, ENVIRONMENT, environment)
+    trails = json.loads(aws(profile, 'cloudtrail', 'describe-trails', '--no-include-shadow-trails',
+        '--region', region))['trailList']
     budgets = json.loads(aws(profile, 'budgets', 'describe-budgets', '--account-id', account, '--region', 'us-east-1'))['Budgets']
     names = governance_settings(trails, budgets, managed)
     (ENVIRONMENT / 'governance.auto.tfvars.json').write_text(json.dumps(names, indent=2) + '\n')
@@ -134,6 +152,8 @@ def main():
         source_environment['AWS_SHARED_CREDENTIALS_FILE'] = options.source_credentials
         raise SystemExit(subprocess.run(['aws', '--profile', options.profile, 'configure',
             'export-credentials', '--format', 'process'], env=source_environment).returncode)
+    if options.region != 'eu-west-3':
+        raise RuntimeError('Région prise en charge par cette démonstration : eu-west-3.')
     if not arguments:
         parser.error("Indiquer une commande Terraform, par exemple plan, apply, output ou destroy.")
     if arguments[0] in ['apply', 'destroy', 'import']:
@@ -150,6 +170,11 @@ def main():
     if arguments[0] not in ['fmt', 'validate', 'version', 'providers'] and not (ENVIRONMENT / '.terraform/terraform.tfstate').exists():
         account = json.loads(aws(options.profile, 'sts', 'get-caller-identity'))['Account']
         initialize_backend(options.profile, options.region, account, binary, environment)
+    if arguments == ['state', 'list']:
+        addresses = state_addresses(binary, ENVIRONMENT, environment)
+        if addresses:
+            print('\n'.join(addresses))
+        return
     from _terraform_cleanup import TerraformCleanupCLI, destroy_with_recovery, recovery_options_supported
     if recovery_options_supported(arguments, environment):
 

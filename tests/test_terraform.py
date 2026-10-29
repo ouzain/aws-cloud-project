@@ -1,8 +1,11 @@
 "Préserver la propriété Terraform lors d’une nouvelle initialisation."
 import importlib.util
+import contextlib
+import io
 import json
 from pathlib import Path
 import sys
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -39,6 +42,72 @@ class GovernanceOwnershipTests(unittest.TestCase):
             [{'Name': 'vitalora-management'}], [{'BudgetName': 'vitalora-existing'}],
             ['module.monitoring.aws_cloudtrail.management[0]']), {
             'existing_audit_trail_name': None, 'existing_budget_name': 'vitalora-existing'})
+
+
+class FreshStateTests(unittest.TestCase):
+    def test_new_account_init_uses_own_backend_and_can_resume_bucket_setup(self):
+        for bucket_exists in [False, True]:
+            with self.subTest(bucket_exists=bucket_exists), tempfile.TemporaryDirectory() as directory:
+                account = '123456789012'
+                bucket = f'tfstate-vitalora-{account}-eu-west-3'
+                calls = []
+                def aws(profile, *arguments):
+                    calls.append(arguments)
+                    if arguments[:2] == ('s3api', 'list-buckets'):
+                        return json.dumps({'Buckets': [{'Name': bucket}] if bucket_exists else []})
+                    if arguments[:2] == ('cloudtrail', 'describe-trails'):
+                        return '{"trailList":[]}'
+                    if arguments[:2] == ('budgets', 'describe-budgets'):
+                        return '{"Budgets":[]}'
+                    return '{}'
+                with patch.object(helper, 'ENVIRONMENT', Path(directory)), \
+                        patch.object(helper, 'aws', side_effect=aws), \
+                        patch.object(helper, 'state_addresses', return_value=[]), \
+                        patch.object(helper.subprocess, 'run') as execute:
+                    helper.initialize_backend('team', 'eu-west-3', account, 'terraform', {})
+                self.assertIn(f'-backend-config=bucket={bucket}', execute.call_args.args[0])
+                for action in ['put-bucket-versioning', 'put-public-access-block', 'put-bucket-encryption']:
+                    self.assertTrue(any(args[:2] == ('s3api', action) for args in calls))
+                config = json.loads((Path(directory) / 'governance.auto.tfvars.json').read_text())
+                self.assertEqual(config, {'existing_audit_trail_name': None, 'existing_budget_name': None})
+
+    def test_public_state_list_accepts_first_deployment_without_creating_resources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            environment = Path(directory)
+            (environment / '.terraform').mkdir()
+            (environment / '.terraform/terraform.tfstate').write_text('{}')
+            with patch.object(helper, 'ENVIRONMENT', environment), \
+                    patch.object(helper, 'terraform_binary', return_value='terraform'), \
+                    patch.object(helper, 'terraform_environment', return_value={}), \
+                    patch.object(helper, 'state_addresses', return_value=[]) as addresses, \
+                    patch.object(helper, 'aws') as aws, \
+                    patch.object(sys, 'argv', ['terraform.py', 'state', 'list']), \
+                    contextlib.redirect_stdout(io.StringIO()) as output:
+                helper.main()
+            self.assertEqual(output.getvalue(), '')
+            addresses.assert_called_once_with('terraform', environment, {})
+            aws.assert_not_called()
+
+    def test_only_exact_absent_state_diagnostic_is_an_empty_environment(self):
+        diagnostic = ('No state file was found!\n\n'
+            'State management commands require a state file. Run this command\n'
+            'in a directory where Terraform has been run or use the -state flag\n'
+            'to point the command to a specific state location.\n')
+        with patch.object(helper.subprocess, 'run', return_value=
+                subprocess.CompletedProcess([], 1, stdout='', stderr=diagnostic)):
+            self.assertEqual(helper.state_addresses('terraform', '/test', {}), [])
+        for error in ['AccessDenied: s3:GetObject', 'Error: Backend initialization required',
+                      diagnostic + 'AccessDenied', 'Error acquiring the state lock']:
+            with self.subTest(error=error), patch.object(helper.subprocess, 'run', return_value=
+                    subprocess.CompletedProcess([], 1, stdout='', stderr=error)):
+                with self.assertRaises(RuntimeError):
+                    helper.state_addresses('terraform', '/test', {})
+
+    def test_existing_addresses_are_preserved(self):
+        with patch.object(helper.subprocess, 'run', return_value=subprocess.CompletedProcess(
+                [], 0, stdout='module.network.aws_vpc.this\n', stderr='')):
+            self.assertEqual(helper.state_addresses('terraform', '/test', {}),
+                ['module.network.aws_vpc.this'])
 
 
 class CleanupEntryPointTests(unittest.TestCase):
