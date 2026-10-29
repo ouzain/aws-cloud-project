@@ -1,0 +1,318 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "KmsServiceEncryption",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3",
+          "kms:ViaService": [
+            "ssm.eu-west-3.amazonaws.com",
+            "s3.eu-west-3.amazonaws.com",
+            "rds.eu-west-3.amazonaws.com"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "KmsResourceGrants",
+      "Effect": "Allow",
+      "Action": [
+        "kms:CreateGrant"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Bool": {
+          "kms:GrantIsForAWSResource": "true"
+        }
+      }
+    },
+    {
+      "Sid": "LambdaDiscovery",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:CreateEventSourceMapping",
+        "lambda:GetLayerVersion",
+        "lambda:ListEventSourceMappings",
+        "lambda:ListFunctions",
+        "lambda:ListTags",
+        "lambda:ListVersionsByFunction"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "LambdaProjectResources",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:AddPermission",
+        "lambda:CreateFunction",
+        "lambda:DeleteEventSourceMapping",
+        "lambda:DeleteFunction",
+        "lambda:GetEventSourceMapping",
+        "lambda:GetFunction",
+        "lambda:GetFunctionCodeSigningConfig",
+        "lambda:GetFunctionConcurrency",
+        "lambda:GetPolicy",
+        "lambda:InvokeFunction",
+        "lambda:PutFunctionConcurrency",
+        "lambda:RemovePermission",
+        "lambda:TagResource",
+        "lambda:UntagResource",
+        "lambda:UpdateEventSourceMapping",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:lambda:eu-west-3:573199225243:function:vitalora-*",
+        "arn:aws:lambda:eu-west-3:573199225243:event-source-mapping:*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "LogsDiscovery",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:GetQueryResults",
+        "logs:ListTagsForResource"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "LogsProjectResources",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:DeleteLogGroup",
+        "logs:DeleteRetentionPolicy",
+        "logs:FilterLogEvents",
+        "logs:GetLogEvents",
+        "logs:PutLogEvents",
+        "logs:PutRetentionPolicy",
+        "logs:StartQuery",
+        "logs:TagLogGroup",
+        "logs:TagResource",
+        "logs:UntagResource"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-west-3:573199225243:log-group:/aws/lambda/vitalora-*",
+        "arn:aws:logs:eu-west-3:573199225243:log-group:/aws/lambda/vitalora-*:*",
+        "arn:aws:logs:eu-west-3:573199225243:log-group:/vitalora/*",
+        "arn:aws:logs:eu-west-3:573199225243:log-group:/vitalora/*:*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "RdsDiscovery",
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBEngineVersions",
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBSubnetGroups",
+        "rds:DescribeOrderableDBInstanceOptions",
+        "rds:ListTagsForResource"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "RdsProjectResources",
+      "Effect": "Allow",
+      "Action": [
+        "rds:AddTagsToResource",
+        "rds:CreateDBInstance",
+        "rds:CreateDBSubnetGroup",
+        "rds:DeleteDBInstance",
+        "rds:DeleteDBSubnetGroup",
+        "rds:ModifyDBInstance",
+        "rds:ModifyDBSubnetGroup",
+        "rds:RebootDBInstance",
+        "rds:RemoveTagsFromResource"
+      ],
+      "Resource": [
+        "arn:aws:rds:eu-west-3:573199225243:db:vitalora-*",
+        "arn:aws:rds:eu-west-3:573199225243:subgrp:vitalora-*",
+        "arn:aws:rds:eu-west-3:573199225243:pg:default.*",
+        "arn:aws:rds:eu-west-3:573199225243:og:default:*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "S3Discovery",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:ListAllMyBuckets",
+        "s3:ListBucket",
+        "s3:ListBucketVersions"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Sid": "S3ProjectResources",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:DeleteBucketPolicy",
+        "s3:DeleteBucketWebsite",
+        "s3:DeleteObject",
+        "s3:DeleteObjectTagging",
+        "s3:DeleteObjectVersion",
+        "s3:DeleteObjectVersionTagging",
+        "s3:GetAccelerateConfiguration",
+        "s3:GetBucketAcl",
+        "s3:GetBucketCORS",
+        "s3:GetBucketLogging",
+        "s3:GetBucketObjectLockConfiguration",
+        "s3:GetBucketOwnershipControls",
+        "s3:GetBucketPolicy",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:GetBucketRequestPayment",
+        "s3:GetBucketTagging",
+        "s3:GetBucketVersioning",
+        "s3:GetBucketWebsite",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetObject",
+        "s3:GetObjectTagging",
+        "s3:GetObjectVersion",
+        "s3:GetObjectVersionTagging",
+        "s3:GetReplicationConfiguration",
+        "s3:PutAccelerateConfiguration",
+        "s3:PutBucketAcl",
+        "s3:PutBucketCORS",
+        "s3:PutBucketLogging",
+        "s3:PutBucketObjectLockConfiguration",
+        "s3:PutBucketOwnershipControls",
+        "s3:PutBucketPolicy",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:PutBucketRequestPayment",
+        "s3:PutBucketTagging",
+        "s3:PutBucketVersioning",
+        "s3:PutBucketWebsite",
+        "s3:PutEncryptionConfiguration",
+        "s3:PutLifecycleConfiguration",
+        "s3:PutObject",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:PutReplicationConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::vitalora-*",
+        "arn:aws:s3:::vitalora-*/*",
+        "arn:aws:s3:::tfstate-vitalora-*",
+        "arn:aws:s3:::tfstate-vitalora-*/*"
+      ]
+    },
+    {
+      "Sid": "SnsDiscovery",
+      "Effect": "Allow",
+      "Action": [
+        "sns:ListSubscriptions",
+        "sns:ListSubscriptionsByTopic",
+        "sns:ListTagsForResource",
+        "sns:ListTopics"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "SnsProjectResources",
+      "Effect": "Allow",
+      "Action": [
+        "sns:CreateTopic",
+        "sns:DeleteTopic",
+        "sns:GetSubscriptionAttributes",
+        "sns:GetTopicAttributes",
+        "sns:Publish",
+        "sns:PutDataProtectionPolicy",
+        "sns:SetSubscriptionAttributes",
+        "sns:SetTopicAttributes",
+        "sns:Subscribe",
+        "sns:TagResource",
+        "sns:Unsubscribe",
+        "sns:UntagResource"
+      ],
+      "Resource": [
+        "arn:aws:sns:eu-west-3:573199225243:vitalora-*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    },
+    {
+      "Sid": "SqsDiscovery",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ListQueueTags",
+        "sqs:ListQueues"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-3"
+        }
+      }
+    }
+  ]
+}

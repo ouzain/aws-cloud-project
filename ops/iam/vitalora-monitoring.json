@@ -1,0 +1,50 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ManageProjectMonitoring",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:DeleteDashboards",
+        "cloudwatch:GetDashboard",
+        "cloudwatch:ListTagsForResource",
+        "cloudwatch:PutDashboard",
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:TagResource",
+        "cloudwatch:UntagResource"
+      ],
+      "Resource": [
+        "arn:aws:cloudwatch:eu-west-3:573199225243:alarm:vitalora-*",
+        "arn:aws:cloudwatch::573199225243:dashboard/vitalora-*"
+      ]
+    },
+    {
+      "Sid": "InspectMonitoring",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:DescribeAlarmHistory",
+        "cloudwatch:ListDashboards",
+        "cloudwatch:GetMetricWidgetImage"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Sid": "ManageProjectMetricFilters",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DeleteMetricFilter",
+        "logs:DescribeMetricFilters",
+        "logs:ListTagsForResource",
+        "logs:PutMetricFilter"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-west-3:573199225243:log-group:/aws/lambda/vitalora-*",
+        "arn:aws:logs:eu-west-3:573199225243:log-group:/vitalora/*"
+      ]
+    }
+  ]
+}
