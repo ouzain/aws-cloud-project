@@ -15,8 +15,8 @@
         "cloudwatch:UntagResource"
       ],
       "Resource": [
-        "arn:aws:cloudwatch:eu-west-3:573199225243:alarm:vitalora-*",
-        "arn:aws:cloudwatch::573199225243:dashboard/vitalora-*"
+        "arn:aws:cloudwatch:${REGION}:${ACCOUNT_ID}:alarm:vitalora-*",
+        "arn:aws:cloudwatch::${ACCOUNT_ID}:dashboard/vitalora-*"
       ]
     },
     {
@@ -42,8 +42,8 @@
         "logs:PutMetricFilter"
       ],
       "Resource": [
-        "arn:aws:logs:eu-west-3:573199225243:log-group:/aws/lambda/vitalora-*",
-        "arn:aws:logs:eu-west-3:573199225243:log-group:/vitalora/*"
+        "arn:aws:logs:${REGION}:${ACCOUNT_ID}:log-group:/aws/lambda/vitalora-*",
+        "arn:aws:logs:${REGION}:${ACCOUNT_ID}:log-group:/vitalora/*"
       ]
     }
   ]
