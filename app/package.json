@@ -4,11 +4,17 @@
   "private": true,
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test ../tests/*.test.js"
   },
   "dependencies": {
-    "@aws-sdk/client-sns": "~3.901.0",
+    "@aws-sdk/client-s3": "3.1159.0",
+    "@aws-sdk/client-sns": "3.1159.0",
+    "@aws-sdk/s3-request-presigner": "3.1159.0",
     "express": "^4.19.2",
     "mysql2": "^3.9.7"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
