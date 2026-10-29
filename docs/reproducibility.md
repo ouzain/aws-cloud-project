@@ -30,6 +30,19 @@ historiques en preuves d’un nouveau déploiement.
 
 ## Exigence des comptes indépendants
 
+### Premier déploiement sans état
+
+Un compte neuf ne possède pas encore de fichier d’état applicatif. Le script
+reconnaît le diagnostic exact `No state file was found!` comme un état vide,
+pendant l’initialisation et le contrôle précédant le plan. Les refus d’accès,
+erreurs de stockage ou de verrouillage restent bloquants.
+
+Si une ancienne révision s’arrête sur ce diagnostic, récupérer la correction
+puis relancer la même commande de déploiement. Il n’est pas nécessaire de créer
+un état fictif, de copier celui d’un autre compte ou de supprimer le compartiment.
+Cette correction ne valide pas à elle seule les permissions ni le déploiement
+complet d’un nouvel autre compte.
+
 La phase 6 de la feuille de route prévoit que chaque membre déploie la même révision dans
 son propre compte. Une reconstruction ou un plan sans changement dans un seul
 compte ne remplace pas ce contrôle. Si l’équipe choisit un périmètre limité au

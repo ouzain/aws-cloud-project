@@ -61,6 +61,23 @@ def governance_settings(trails, budgets, managed_addresses):
     }
 
 
+def state_addresses(binary, directory, environment):
+    """Un stockage neuf n’a pas encore d’état ; une erreur d’accès reste bloquante."""
+    result = subprocess.run([binary, 'state', 'list', '-no-color'], cwd=directory,
+        env=environment, capture_output=True, text=True)
+    if result.returncode == 0:
+        return result.stdout.splitlines()
+    missing_state = (
+        'No state file was found! '
+        'State management commands require a state file. Run this command '
+        'in a directory where Terraform has been run or use the -state flag '
+        'to point the command to a specific state location.')
+    if (result.returncode == 1 and not result.stdout.strip()
+            and ' '.join(result.stderr.split()) == missing_state):
+        return []
+    raise RuntimeError(result.stderr.strip() or 'Impossible de lire l’état Terraform.')
+
+
 def initialize_backend(profile, region, account, binary, environment):
     bucket = f'tfstate-vitalora-{account}-{region}'
     buckets = json.loads(aws(profile, 's3api', 'list-buckets', '--output', 'json'))['Buckets']
@@ -81,8 +98,7 @@ def initialize_backend(profile, region, account, binary, environment):
         f'-backend-config=bucket={bucket}', '-backend-config=key=hybrid/terraform.tfstate',
         f'-backend-config=region={region}', '-backend-config=encrypt=true', '-backend-config=use_lockfile=true'],
         cwd=ENVIRONMENT, env=environment, check=True)
-    managed = subprocess.check_output([binary, 'state', 'list'], cwd=ENVIRONMENT,
-        env=environment, text=True).splitlines()
+    managed = state_addresses(binary, ENVIRONMENT, environment)
     trails = json.loads(aws(profile, 'cloudtrail', 'describe-trails', '--region', region))['trailList']
     budgets = json.loads(aws(profile, 'budgets', 'describe-budgets', '--account-id', account, '--region', 'us-east-1'))['Budgets']
     names = governance_settings(trails, budgets, managed)
@@ -150,6 +166,11 @@ def main():
     if arguments[0] not in ['fmt', 'validate', 'version', 'providers'] and not (ENVIRONMENT / '.terraform/terraform.tfstate').exists():
         account = json.loads(aws(options.profile, 'sts', 'get-caller-identity'))['Account']
         initialize_backend(options.profile, options.region, account, binary, environment)
+    if arguments == ['state', 'list']:
+        addresses = state_addresses(binary, ENVIRONMENT, environment)
+        if addresses:
+            print('\n'.join(addresses))
+        return
     from _terraform_cleanup import TerraformCleanupCLI, destroy_with_recovery, recovery_options_supported
     if recovery_options_supported(arguments, environment):
 
