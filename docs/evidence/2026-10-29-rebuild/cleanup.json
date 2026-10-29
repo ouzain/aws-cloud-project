@@ -1,0 +1,23 @@
+{
+  "checked_at": "2026-10-29T15:33:08.576600+00:00",
+  "status": "completed",
+  "account": "573199225243",
+  "region": "eu-west-3",
+  "application_state_empty": true,
+  "remaining_application_resources": {
+    "active_ec2_instances": 0,
+    "load_balancers": 0,
+    "databases": 0,
+    "lambda_functions": 0,
+    "queues": 0,
+    "vpcs": 0
+  },
+  "preexisting_audit_still_logging": true,
+  "recovery": "Confirmed the deleted project mapping was absent, removed only its stale state entry, then completed Terraform destroy without broader IAM permissions.",
+  "retained": [
+    "pre-existing audit trail and bucket",
+    "pre-existing budget",
+    "encrypted versioned Terraform backend",
+    "approved IAM bootstrap policies"
+  ]
+}

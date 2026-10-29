@@ -1,0 +1,362 @@
+[
+  {
+    "product_id": 1,
+    "name": "Magnésium marin",
+    "category": "wellness",
+    "price_cents": 1690,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/1.svg"
+  },
+  {
+    "product_id": 2,
+    "name": "Multivitamines quotidiennes",
+    "category": "wellness",
+    "price_cents": 2390,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/2.svg"
+  },
+  {
+    "product_id": 3,
+    "name": "Gélules d’oméga-3",
+    "category": "wellness",
+    "price_cents": 3090,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/3.svg"
+  },
+  {
+    "product_id": 4,
+    "name": "Complexe probiotique",
+    "category": "wellness",
+    "price_cents": 1190,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/4.svg"
+  },
+  {
+    "product_id": 5,
+    "name": "Vitamine D3 + K2",
+    "category": "wellness",
+    "price_cents": 1890,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/5.svg"
+  },
+  {
+    "product_id": 6,
+    "name": "Comprimés de mélatonine",
+    "category": "wellness",
+    "price_cents": 2590,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/6.svg"
+  },
+  {
+    "product_id": 7,
+    "name": "Créatine monohydrate",
+    "category": "sports-nutrition",
+    "price_cents": 3290,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/7.svg"
+  },
+  {
+    "product_id": 8,
+    "name": "Protéine de lactosérum vanille",
+    "category": "sports-nutrition",
+    "price_cents": 1390,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/8.svg"
+  },
+  {
+    "product_id": 9,
+    "name": "BCAA 2:1:1",
+    "category": "sports-nutrition",
+    "price_cents": 2090,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/9.svg"
+  },
+  {
+    "product_id": 10,
+    "name": "Mélange avant entraînement",
+    "category": "sports-nutrition",
+    "price_cents": 2790,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/10.svg"
+  },
+  {
+    "product_id": 11,
+    "name": "Barres protéinées",
+    "category": "sports-nutrition",
+    "price_cents": 3490,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/11.svg"
+  },
+  {
+    "product_id": 12,
+    "name": "Shaker VITALORA",
+    "category": "sports-nutrition",
+    "price_cents": 1590,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/12.svg"
+  },
+  {
+    "product_id": 13,
+    "name": "Curcuma biologique",
+    "category": "botanicals",
+    "price_cents": 2290,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/13.svg"
+  },
+  {
+    "product_id": 14,
+    "name": "Gouttes d’ashwagandha",
+    "category": "botanicals",
+    "price_cents": 2990,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/14.svg"
+  },
+  {
+    "product_id": 15,
+    "name": "Infusion de plantes",
+    "category": "botanicals",
+    "price_cents": 1090,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/15.svg"
+  },
+  {
+    "product_id": 16,
+    "name": "Comprimés de spiruline",
+    "category": "botanicals",
+    "price_cents": 1790,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/16.svg"
+  },
+  {
+    "product_id": 17,
+    "name": "Gélules de ginseng",
+    "category": "botanicals",
+    "price_cents": 2490,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/17.svg"
+  },
+  {
+    "product_id": 18,
+    "name": "Mélange de plantes",
+    "category": "botanicals",
+    "price_cents": 3190,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/18.svg"
+  },
+  {
+    "product_id": 19,
+    "name": "Cheveux, peau et ongles",
+    "category": "beauty",
+    "price_cents": 1290,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/19.svg"
+  },
+  {
+    "product_id": 20,
+    "name": "Collagène marin",
+    "category": "beauty",
+    "price_cents": 1990,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/20.svg"
+  },
+  {
+    "product_id": 21,
+    "name": "Acide hyaluronique",
+    "category": "beauty",
+    "price_cents": 2690,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/21.svg"
+  },
+  {
+    "product_id": 22,
+    "name": "Gélules de vitamine C",
+    "category": "beauty",
+    "price_cents": 3390,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/22.svg"
+  },
+  {
+    "product_id": 23,
+    "name": "Zinc et biotine",
+    "category": "beauty",
+    "price_cents": 1490,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/23.svg"
+  },
+  {
+    "product_id": 24,
+    "name": "Huile de bourrache",
+    "category": "beauty",
+    "price_cents": 2190,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/24.svg"
+  },
+  {
+    "product_id": 25,
+    "name": "Complexe de vitamines B",
+    "category": "wellness",
+    "price_cents": 2890,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/25.svg"
+  },
+  {
+    "product_id": 26,
+    "name": "Calcium et vitamine D3",
+    "category": "wellness",
+    "price_cents": 990,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/26.svg"
+  },
+  {
+    "product_id": 27,
+    "name": "Fibres quotidiennes",
+    "category": "wellness",
+    "price_cents": 1690,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/27.svg"
+  },
+  {
+    "product_id": 28,
+    "name": "Comprimés d’électrolytes",
+    "category": "wellness",
+    "price_cents": 2390,
+    "stock_qty": 100,
+    "description": "Bien-être quotidien. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/wellness/28.svg"
+  },
+  {
+    "product_id": 29,
+    "name": "Protéine végétale",
+    "category": "sports-nutrition",
+    "price_cents": 3090,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/29.svg"
+  },
+  {
+    "product_id": 30,
+    "name": "Boisson de récupération",
+    "category": "sports-nutrition",
+    "price_cents": 1190,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/30.svg"
+  },
+  {
+    "product_id": 31,
+    "name": "Hydratation sportive",
+    "category": "sports-nutrition",
+    "price_cents": 1890,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/31.svg"
+  },
+  {
+    "product_id": 32,
+    "name": "Gel énergétique",
+    "category": "sports-nutrition",
+    "price_cents": 2590,
+    "stock_qty": 100,
+    "description": "Nutrition sportive. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/sports-nutrition/32.svg"
+  },
+  {
+    "product_id": 33,
+    "name": "Gélules de gingembre",
+    "category": "botanicals",
+    "price_cents": 3290,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/33.svg"
+  },
+  {
+    "product_id": 34,
+    "name": "Extrait de thé vert",
+    "category": "botanicals",
+    "price_cents": 1390,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/34.svg"
+  },
+  {
+    "product_id": 35,
+    "name": "Chardon-Marie",
+    "category": "botanicals",
+    "price_cents": 2090,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/35.svg"
+  },
+  {
+    "product_id": 36,
+    "name": "Mélange de plantes du soir",
+    "category": "botanicals",
+    "price_cents": 2790,
+    "stock_qty": 100,
+    "description": "Plantes et herbes. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/botanicals/36.svg"
+  },
+  {
+    "product_id": 37,
+    "name": "Gommes beauté",
+    "category": "beauty",
+    "price_cents": 3490,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/37.svg"
+  },
+  {
+    "product_id": 38,
+    "name": "Boisson au collagène",
+    "category": "beauty",
+    "price_cents": 1590,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/38.svg"
+  },
+  {
+    "product_id": 39,
+    "name": "Huile d’onagre",
+    "category": "beauty",
+    "price_cents": 2290,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/39.svg"
+  },
+  {
+    "product_id": 40,
+    "name": "Complexe antioxydant beauté",
+    "category": "beauty",
+    "price_cents": 2990,
+    "stock_qty": 100,
+    "description": "Nutrition beauté. Produit fictif pour la démonstration d’architecture cloud VITALORA.",
+    "image_key": "products/beauty/40.svg"
+  }
+]

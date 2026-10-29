@@ -1,6 +1,5 @@
 output "topic_arn" {
-  description = "ARN du topic SNS order-confirmation (publié par l'app à chaque commande)"
-  value       = aws_sns_topic.order_confirmation.arn
+  value = aws_sns_topic.order_confirmation.arn
 }
 
 output "queue_url" {
@@ -12,11 +11,9 @@ output "dlq_url" {
 }
 
 output "consumer_log_group" {
-  description = "Log group CloudWatch où lire confirmation -> notification interne -> traitement"
-  value       = aws_cloudwatch_log_group.consumer.name
+  value = aws_cloudwatch_log_group.consumer.name
 }
 
-output "notifications_topic_arn" {
-  description = "Topic SNS des notifications par étape (e-mail)"
-  value       = aws_sns_topic.order_notifications.arn
+output "function_name" {
+  value = aws_lambda_function.consumer.function_name
 }

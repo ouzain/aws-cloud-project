@@ -1,0 +1,26 @@
+{
+  "verified_at": "2026-10-29T13:29:20.702497+00:00",
+  "phase": 5,
+  "dashboard": "vitalora-hybrid",
+  "encryption": {
+    "s3": "AWS-managed KMS",
+    "rds": true
+  },
+  "private_bucket": true,
+  "audit_event": {
+    "eventTime": "2026-10-29T12:54:05Z",
+    "eventName": "PutMetricAlarm",
+    "eventSource": "monitoring.amazonaws.com",
+    "actor": "arn:aws:iam::573199225243:user/vitalora/vitalora-deployer"
+  },
+  "budget_thresholds": [
+    20,
+    50,
+    80
+  ],
+  "alarm": {
+    "name": "vitalora-processing_failures",
+    "state": "ALARM",
+    "reason": "Threshold Crossed: 1 out of the last 2 datapoints [1.0 (29/10/26 13:28:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition)."
+  }
+}

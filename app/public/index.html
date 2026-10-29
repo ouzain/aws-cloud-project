@@ -15,16 +15,16 @@
   </header>
 
   <nav class="category-tabs" id="category-tabs">
-    <button class="tab active" data-category="">Tous</button>
-    <button class="tab" data-category="bien-etre">Bien-être &amp; routines</button>
-    <button class="tab" data-category="nutrition-sportive">Nutrition sportive</button>
-    <button class="tab" data-category="plantes">Compléments à base de plantes</button>
-    <button class="tab" data-category="beaute">Beauté &amp; nutrition</button>
+    <button class="tab active" data-category="">Tous les produits</button>
+    <button class="tab" data-category="wellness">Bien-être quotidien</button>
+    <button class="tab" data-category="sports-nutrition">Nutrition sportive</button>
+    <button class="tab" data-category="botanicals">Plantes et herbes</button>
+    <button class="tab" data-category="beauty">Nutrition beauté</button>
   </nav>
 
   <main>
     <section id="catalog" class="catalog" aria-live="polite">
-      <p class="loading">Chargement du catalogue…</p>
+      <p class="loading">Chargement des produits…</p>
     </section>
   </main>
 
@@ -37,8 +37,8 @@
     <p class="cart-total">Total : <strong id="cart-total">0,00 €</strong></p>
 
     <form id="order-form">
-      <label for="customer-email">E-mail</label>
-      <input type="email" id="customer-email" name="customer_email" placeholder="toi@exemple.fr" required />
+      <label for="customer-email">Adresse e-mail</label>
+      <input type="email" id="customer-email" name="customer_email" placeholder="vous@example.com" required />
       <button type="submit" id="submit-order">Valider la commande</button>
     </form>
 
@@ -47,12 +47,13 @@
 
   <div id="confirmation" class="confirmation hidden">
     <div class="confirmation-box">
-      <h2>Commande enregistrée</h2>
+      <h2>Commande reçue</h2>
       <p>Numéro de commande : <strong id="confirm-order-id"></strong></p>
       <p id="confirm-total"></p>
+      <p id="confirm-status" role="status"></p>
       <p class="confirmation-note">
-        Une confirmation sera envoyée par e-mail dès le traitement interne
-        (emballage, expédition) terminé.
+        Votre commande est enregistrée. Son statut de traitement est affiché ci-dessus.
+        Les notifications par e-mail sont disponibles si elles sont activées pour la démonstration.
       </p>
       <button id="confirmation-close" type="button">Fermer</button>
     </div>

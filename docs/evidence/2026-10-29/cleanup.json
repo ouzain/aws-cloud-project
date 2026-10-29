@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-10-29T14:21:10.017920+00:00",
+  "status": "completed",
+  "account": "573199225243",
+  "region": "eu-west-3",
+  "remaining_application_resources": {
+    "active_ec2_instances": 0,
+    "load_balancers": 0,
+    "databases": 0,
+    "lambda_functions": 0,
+    "queues": 0
+  },
+  "pending": [],
+  "recovery": "Confirmed the deleted event source mapping was absent before removing its stale state entry. Restored original project IAM policy scope.",
+  "retained": [
+    "pre-existing audit trail and bucket",
+    "pre-existing budget",
+    "encrypted versioned Terraform state backend",
+    "approved IAM bootstrap policies"
+  ],
+  "terraform_destroy": "completed_after_confirmed_stale_mapping_recovery",
+  "final_destroy_removed_resources": 16,
+  "terraform_managed_state_empty": true
+}

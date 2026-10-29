@@ -1,0 +1,10 @@
+{
+  "verifie_le": "2026-10-29T17:26:28.432096+00:00",
+  "compte": "573199225243",
+  "region": "eu-west-3",
+  "vpc_projet": 0,
+  "instances_rds": [],
+  "fonctions_lambda": [],
+  "files_commande": [],
+  "ressources_etat_terraform": 0
+}

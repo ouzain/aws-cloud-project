@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-10-29T13:30:40.439048+00:00",
+  "account": "573199225243",
+  "region": "eu-west-3",
+  "terraform_version": "1.13.5",
+  "node_runtime": "22",
+  "aws_sdk_version": "3.1159.0",
+  "application_tests_passed": 9,
+  "governance_ownership_tests_passed": 4,
+  "terraform_plan_after_identical_rebuild": "no changes",
+  "terraform_plan_after_reinitialization": "no changes",
+  "additional_team_accounts_verified": 0,
+  "sha256": {
+    ".build/runtime.zip": "90fdb29da717e86b1911261685326b83c0810a0fa53c8a0930eb9af4e6ff93f7",
+    "app/package-lock.json": "72a3a0b4f119fd3d72a965aa690de53baac70892e8116b0e6342a6b02a19294c",
+    "envs/vm-based/.terraform.lock.hcl": "07a45130eaac1a421ebf885a298b8ddb9f1ae23b9ff7320a3f259dcf6d807821"
+  }
+}

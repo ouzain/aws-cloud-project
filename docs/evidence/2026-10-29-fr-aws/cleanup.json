@@ -1,0 +1,14 @@
+{
+  "ressources_initiales": 96,
+  "recuperation_automatique": true,
+  "entree_retiree": true,
+  "verifications_absence": 2,
+  "adresse": "module.messaging.aws_lambda_event_source_mapping.consumer",
+  "uuid": "f0d3070a-baba-4d4b-80ff-955ecc0f5491",
+  "code_retour": 0,
+  "ressources_restantes": 0,
+  "etat_applicatif_vide": true,
+  "compte": "573199225243",
+  "region": "eu-west-3",
+  "verifie_le": "2026-10-29T17:26:01.342208+00:00"
+}

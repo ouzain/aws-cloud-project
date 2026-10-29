@@ -15,10 +15,18 @@ output "db_username" {
 }
 
 output "db_password_ssm_name" {
-  description = "Nom du paramètre SSM (SecureString) contenant le mot de passe — jamais le mot de passe lui-même"
-  value       = aws_ssm_parameter.db_password.name
+  value = aws_ssm_parameter.db_password.name
 }
 
 output "assets_bucket_name" {
   value = aws_s3_bucket.assets.bucket
+}
+
+output "application_key" {
+  value = aws_s3_object.application.key
+}
+
+output "db_password" {
+  value     = random_password.db.result
+  sensitive = true
 }

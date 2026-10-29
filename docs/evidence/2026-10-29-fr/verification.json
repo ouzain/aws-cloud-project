@@ -1,0 +1,27 @@
+{
+  "verifie_le": "2026-10-29T16:16:04.238092+00:00",
+  "langue": "fr-FR",
+  "perimetre": "Traduction française et vérifications locales",
+  "tests_applicatifs_reussis": 9,
+  "tests_gouvernance_reussis": 4,
+  "validation_terraform": true,
+  "compilation_locale": true,
+  "produits_et_images_svg": 40,
+  "navigateur": {
+    "origine": "http://127.0.0.1:3100/",
+    "donnees_simulees": true,
+    "catalogue_et_panier_francais": true,
+    "total_affiche": "49,80 €",
+    "message_stock_francais": true,
+    "commande_locale": 102,
+    "statut_affiche": "Expédiée",
+    "filtre_nutrition_sportive_conserve": true
+  },
+  "nouveau_deploiement_aws": false,
+  "preuves_aws_historiques_modifiees": false,
+  "empreintes_sha256": {
+    "app/public/index.html": "aa09942f46904f437c6cae10e3b99d91a5f31b41bea88bf46786a0a9598f9035",
+    "app/public/app.js": "8c3a2340111a5172527f832cb6d1f359737fb8b678170ed739581586794869a1",
+    "catalog/products.json": "e35f23be5d4eef132ee4fc2dd005a932730e9302e0320179ab3d3579a8de7671"
+  }
+}

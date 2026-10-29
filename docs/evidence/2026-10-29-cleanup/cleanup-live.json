@@ -1,0 +1,36 @@
+{
+  "ressources_initiales": 6,
+  "recuperation_automatique": true,
+  "entree_retiree": true,
+  "verifications_absence": 2,
+  "adresse": "module.messaging.aws_lambda_event_source_mapping.consumer",
+  "uuid": "4f466804-8d68-4d1a-8d99-7828e8685d35",
+  "code_retour": 0,
+  "ressources_restantes": 0,
+  "etat_applicatif_vide": true,
+  "compte": "573199225243",
+  "principal": "arn:aws:iam::573199225243:user/vitalora/vitalora-deployer",
+  "region": "eu-west-3",
+  "projet_temporaire": "vitalora-cleanup-b293a88edf",
+  "demarre_le": "2026-10-29T16:41:58.001277+00:00",
+  "termine_le": "2026-10-29T16:43:55.062926+00:00",
+  "version_fournisseur_aws": "5.100.0",
+  "deuxieme_suppression": {
+    "ressources_initiales": 0,
+    "recuperation_automatique": false,
+    "entree_retiree": false,
+    "verifications_absence": 0,
+    "code_retour": 0,
+    "ressources_restantes": 0,
+    "etat_applicatif_vide": true
+  },
+  "absences_aws": {
+    "lambda": true,
+    "sqs": true,
+    "role_iam": true,
+    "groupe_journaux": true
+  },
+  "etat_boutique_reste_vide": true,
+  "portee": "Banc Lambda/SQS isolé ; aucune validation fonctionnelle de la boutique.",
+  "resultat": "PASS"
+}
