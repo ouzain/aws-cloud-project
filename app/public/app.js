@@ -1,236 +1,96 @@
-// VITALORA — front minimal (vanilla JS, pas de framework : le brief ne
-// demande pas de soigner l'UI, juste de démontrer le parcours catalogue ->
-// commande -> confirmation).
-
-let assetsBaseUrl = null;
 let products = [];
-let cart = []; // [{ product, qty }] — en mémoire, pas de persistance volontaire
+let cart = [];
+let lastRequest;
+let statusTimer;
+const byId = (id) => document.getElementById(id);
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const price = (cents) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+const orderStatusLabel = (status) => ({ received: 'Reçue', confirmed: 'Confirmée',
+  processing: 'En préparation', shipped: 'Expédiée' }[status] || 'En attente de mise à jour');
 
-const catalogEl = document.getElementById("catalog");
-const tabsEl = document.getElementById("category-tabs");
-const cartToggleEl = document.getElementById("cart-toggle");
-const cartPanelEl = document.getElementById("cart-panel");
-const cartCloseEl = document.getElementById("cart-close");
-const cartCountEl = document.getElementById("cart-count");
-const cartItemsEl = document.getElementById("cart-items");
-const cartTotalEl = document.getElementById("cart-total");
-const orderFormEl = document.getElementById("order-form");
-const orderFeedbackEl = document.getElementById("order-feedback");
-const submitOrderEl = document.getElementById("submit-order");
-const confirmationEl = document.getElementById("confirmation");
-const confirmOrderIdEl = document.getElementById("confirm-order-id");
-const confirmTotalEl = document.getElementById("confirm-total");
-const confirmationCloseEl = document.getElementById("confirmation-close");
-
-function formatPrice(cents) {
-  return (cents / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €";
-}
-
-function productImageMarkup(product) {
-  if (assetsBaseUrl && product.image_key) {
-    const url = `${assetsBaseUrl}/${product.image_key}`;
-    const initial = product.name.charAt(0).toUpperCase();
-    // onerror : si l'image n'existe pas encore dans le bucket, on retombe
-    // sur un bloc coloré avec l'initiale plutôt qu'une icône cassée.
-    return (
-      `<img class="product-image" src="${url}" alt="${product.name}" ` +
-      `onerror="this.outerHTML='<div class=&quot;product-image-placeholder&quot;>${initial}</div>'" />`
-    );
-  }
-  const initial = product.name.charAt(0).toUpperCase();
-  return `<div class="product-image-placeholder">${initial}</div>`;
-}
-
-function renderCatalog(list) {
-  if (list.length === 0) {
-    catalogEl.innerHTML = '<p class="empty-state">Aucun produit dans cette catégorie.</p>';
-    return;
-  }
-
-  catalogEl.innerHTML = list
-    .map((p) => {
-      const outOfStock = p.stock_qty <= 0;
-      return `
-        <article class="product-card" data-product-id="${p.product_id}">
-          ${productImageMarkup(p)}
-          <p class="product-name">${p.name}</p>
-          <p class="product-desc">${p.description || ""}</p>
-          <div class="product-footer">
-            <span class="product-price">${formatPrice(p.price_cents)}</span>
-            <span class="product-stock">${outOfStock ? "Rupture" : p.stock_qty + " en stock"}</span>
-          </div>
-          <button class="add-to-cart" data-product-id="${p.product_id}" ${outOfStock ? "disabled" : ""}>
-            Ajouter au panier
-          </button>
-        </article>`;
-    })
-    .join("");
-}
-
-async function loadConfig() {
+async function loadProducts(category = document.querySelector('.tab.active')?.dataset.category) {
+  byId('catalog').innerHTML = '<p class="loading">Chargement des produits…</p>';
   try {
-    const res = await fetch("/config");
-    const data = await res.json();
-    assetsBaseUrl = data.assetsBaseUrl;
-  } catch (err) {
-    // Pas bloquant : les produits s'affichent avec le placeholder coloré.
-    console.warn("Config indisponible, images en placeholder.", err);
-  }
+    const response = await fetch(category ? '/products?category=' + encodeURIComponent(category) : '/products');
+    if (!response.ok) throw new Error('catalog_unavailable');
+    products = await response.json();
+    byId('catalog').innerHTML = products.map((p) => `<article class="product-card">
+      <img class="product-image" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" />
+      <p class="product-name">${escapeHtml(p.name)}</p><p class="product-desc">${escapeHtml(p.description)}</p>
+      <div class="product-footer"><span class="product-price">${price(p.price_cents)}</span>
+      <span class="product-stock">${p.stock_qty > 0 ? p.stock_qty + ' en stock' : 'Rupture de stock'}</span></div>
+      <button class="add-to-cart" data-product-id="${p.product_id}" ${p.stock_qty <= 0 ? 'disabled' : ''}>Ajouter au panier</button>
+      </article>`).join('');
+  } catch (error) { byId('catalog').innerHTML = '<p class="error-state">Le catalogue est temporairement indisponible. Veuillez réessayer.</p>'; }
 }
-
-async function loadProducts(category) {
-  catalogEl.innerHTML = '<p class="loading">Chargement du catalogue…</p>';
-  try {
-    const url = category ? `/products?category=${encodeURIComponent(category)}` : "/products";
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("http_" + res.status);
-    products = await res.json();
-    renderCatalog(products);
-  } catch (err) {
-    catalogEl.innerHTML = '<p class="error-state">Catalogue indisponible pour le moment. Réessaie dans un instant.</p>';
-    console.error("loadProducts failed:", err);
-  }
-}
-
 function renderCart() {
-  cartCountEl.textContent = cart.reduce((sum, line) => sum + line.qty, 0);
-
-  if (cart.length === 0) {
-    cartItemsEl.innerHTML = '<p class="empty-state">Panier vide.</p>';
-    cartTotalEl.textContent = formatPrice(0);
-    submitOrderEl.disabled = true;
-    return;
-  }
-
-  cartItemsEl.innerHTML = cart
-    .map(
-      (line, index) => `
-        <div class="cart-line">
-          <span>${line.product.name} × ${line.qty}</span>
-          <span>${formatPrice(line.product.price_cents * line.qty)}</span>
-          <button type="button" class="remove-line" data-index="${index}" aria-label="Retirer">×</button>
-        </div>`
-    )
-    .join("");
-
-  const total = cart.reduce((sum, line) => sum + line.product.price_cents * line.qty, 0);
-  cartTotalEl.textContent = formatPrice(total);
-  submitOrderEl.disabled = false;
+  byId('cart-count').textContent = cart.reduce((n, line) => n + line.qty, 0);
+  byId('cart-items').innerHTML = cart.length ? cart.map((line, index) => `<div class="cart-line">
+    <span>${escapeHtml(line.product.name)} × ${line.qty}</span><span>${price(line.product.price_cents * line.qty)}</span>
+    <button type="button" class="remove-line" data-index="${index}" aria-label="Retirer cet article">×</button></div>`).join('') : '<p class="empty-state">Votre panier est vide.</p>';
+  byId('cart-total').textContent = price(cart.reduce((n, line) => n + line.qty * line.product.price_cents, 0));
+  byId('submit-order').disabled = !cart.length;
 }
-
-function addToCart(productId) {
-  const product = products.find((p) => p.product_id === productId);
-  if (!product) return;
-
-  const existing = cart.find((line) => line.product.product_id === productId);
-  if (existing) {
-    existing.qty += 1;
-  } else {
-    cart.push({ product, qty: 1 });
-  }
-  renderCart();
-  cartPanelEl.classList.remove("hidden");
-}
-
-function removeFromCart(index) {
-  cart.splice(index, 1);
-  renderCart();
-}
-
-// --- Événements catalogue ---------------------------------------------
-
-catalogEl.addEventListener("click", (event) => {
-  const button = event.target.closest(".add-to-cart");
+byId('catalog').addEventListener('click', (event) => {
+  const button = event.target.closest('.add-to-cart');
   if (!button) return;
-  addToCart(Number(button.dataset.productId));
+  const product = products.find((p) => p.product_id === Number(button.dataset.productId));
+  const line = cart.find((item) => item.product.product_id === product.product_id);
+  if ((line?.qty || 0) >= Math.min(product.stock_qty, 50)) return;
+  if (line) line.qty++; else cart.push({ product, qty: 1 });
+  renderCart(); byId('cart-panel').classList.remove('hidden');
 });
-
-tabsEl.addEventListener("click", (event) => {
-  const tab = event.target.closest(".tab");
+byId('category-tabs').addEventListener('click', (event) => {
+  const tab = event.target.closest('.tab');
   if (!tab) return;
-  tabsEl.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-  tab.classList.add("active");
-  loadProducts(tab.dataset.category || undefined);
+  document.querySelectorAll('.tab').forEach((item) => item.classList.remove('active'));
+  tab.classList.add('active'); loadProducts(tab.dataset.category);
 });
-
-// --- Événements panier ---------------------------------------------
-
-cartToggleEl.addEventListener("click", () => cartPanelEl.classList.toggle("hidden"));
-cartCloseEl.addEventListener("click", () => cartPanelEl.classList.add("hidden"));
-
-cartItemsEl.addEventListener("click", (event) => {
-  const button = event.target.closest(".remove-line");
-  if (!button) return;
-  removeFromCart(Number(button.dataset.index));
+byId('cart-items').addEventListener('click', (event) => {
+  const button = event.target.closest('.remove-line');
+  if (button) { cart.splice(Number(button.dataset.index), 1); renderCart(); }
 });
+byId('cart-toggle').onclick = () => byId('cart-panel').classList.toggle('hidden');
+byId('cart-close').onclick = () => byId('cart-panel').classList.add('hidden');
+byId('confirmation-close').onclick = () => { byId('confirmation').classList.add('hidden'); clearTimeout(statusTimer); };
 
-// --- Soumission de commande ---------------------------------------------
-
-orderFormEl.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  orderFeedbackEl.textContent = "";
-  orderFeedbackEl.classList.remove("error");
-
-  if (cart.length === 0) return;
-
-  const customerEmail = document.getElementById("customer-email").value.trim();
-  const payload = {
-    customer_email: customerEmail,
-    items: cart.map((line) => ({ product_id: line.product.product_id, qty: line.qty })),
-  };
-
-  submitOrderEl.disabled = true;
-  submitOrderEl.textContent = "Envoi en cours…";
-
+async function trackOrder(orderId, attempt = 0) {
   try {
-    const res = await fetch("/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "order_failed");
-    }
-
-    const total = cart.reduce((sum, line) => sum + line.product.price_cents * line.qty, 0);
-    confirmOrderIdEl.textContent = "#" + data.order_id;
-    confirmTotalEl.textContent = "Total : " + formatPrice(total);
-    confirmationEl.classList.remove("hidden");
-
-    cart = [];
-    renderCart();
-    cartPanelEl.classList.add("hidden");
-    orderFormEl.reset();
-    loadProducts(); // rafraîchit les stocks affichés
-  } catch (err) {
-    orderFeedbackEl.textContent = orderErrorMessage(err.message);
-    orderFeedbackEl.classList.add("error");
-  } finally {
-    submitOrderEl.disabled = cart.length === 0;
-    submitOrderEl.textContent = "Valider la commande";
-  }
-});
-
-function orderErrorMessage(code) {
-  switch (code) {
-    case "invalid_email":
-      return "Adresse e-mail invalide.";
-    case "empty_cart":
-      return "Le panier est vide.";
-    case "insufficient_stock":
-      return "Stock insuffisant pour un des produits.";
-    case "product_not_found":
-      return "Un produit du panier n'existe plus.";
-    default:
-      return "Une erreur est survenue, réessaie.";
-  }
+    const response = await fetch('/orders/' + orderId);
+    if (!response.ok) throw new Error('status_unavailable');
+    const order = await response.json();
+    byId('confirm-status').textContent = 'Statut de la commande : ' + orderStatusLabel(order.status);
+    if (order.status === 'shipped') return;
+  } catch (error) { byId('confirm-status').textContent = 'Votre commande est enregistrée. Son statut sera bientôt actualisé.'; }
+  if (attempt < 40) statusTimer = setTimeout(() => trackOrder(orderId, attempt + 1), 1500);
 }
-
-confirmationCloseEl.addEventListener("click", () => confirmationEl.classList.add("hidden"));
-
-// --- Démarrage ---------------------------------------------
-
-loadConfig().then(() => loadProducts());
-renderCart();
+byId('order-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!cart.length) return;
+  const payload = JSON.stringify({ customer_email: byId('customer-email').value.trim(),
+    items: cart.map((line) => ({ product_id: line.product.product_id, qty: line.qty })) });
+  if (lastRequest?.payload !== payload) lastRequest = { payload,
+    key: Array.from(crypto.getRandomValues(new Uint8Array(16)), (n) => n.toString(16).padStart(2, '0')).join('') };
+  byId('order-feedback').textContent = '';
+  byId('submit-order').disabled = true;
+  byId('submit-order').textContent = 'Enregistrement de la commande…';
+  try {
+    const response = await fetch('/orders', { method: 'POST', headers: {
+      'Content-Type': 'application/json', 'Idempotency-Key': lastRequest.key,
+    }, body: payload });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    byId('confirm-order-id').textContent = '#' + data.order_id;
+    byId('confirm-total').textContent = 'Total : ' + price(data.total_cents);
+    byId('confirm-status').textContent = 'Statut de la commande : ' + orderStatusLabel(data.status);
+    byId('confirmation').classList.remove('hidden');
+    clearTimeout(statusTimer); trackOrder(data.order_id);
+    cart = []; lastRequest = null; renderCart();
+    byId('cart-panel').classList.add('hidden'); byId('order-form').reset(); loadProducts();
+  } catch (error) {
+    byId('order-feedback').textContent = error.message === 'insufficient_stock'
+      ? 'Le stock est insuffisant pour cette commande.' : 'La commande n’a pas pu être confirmée. Veuillez réessayer.';
+    byId('order-feedback').classList.add('error');
+  } finally { byId('submit-order').disabled = !cart.length; byId('submit-order').textContent = 'Valider la commande'; }
+});
+loadProducts(); renderCart();
