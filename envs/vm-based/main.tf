@@ -15,6 +15,14 @@ module "database" {
   rds_sg_id          = module.network.rds_sg_id
 }
 
+module "messaging" {
+  source = "../../modules/messaging"
+
+  project_name       = var.project_name
+  owner_tag          = var.owner_tag
+  notification_email = var.notification_email
+}
+
 module "compute_vm" {
   source = "../../modules/compute-vm"
 
@@ -27,9 +35,11 @@ module "compute_vm" {
   instance_type     = var.instance_type
   key_name          = var.key_name
 
-  db_endpoint           = module.database.db_endpoint
-  db_name               = module.database.db_name
-  db_username           = module.database.db_username
-  db_password_ssm_name  = module.database.db_password_ssm_name
-  assets_bucket_name    = module.database.assets_bucket_name
+  db_endpoint          = module.database.db_endpoint
+  db_name              = module.database.db_name
+  db_username          = module.database.db_username
+  db_password_ssm_name = module.database.db_password_ssm_name
+  assets_bucket_name   = module.database.assets_bucket_name
+
+  order_topic_arn = module.messaging.topic_arn
 }

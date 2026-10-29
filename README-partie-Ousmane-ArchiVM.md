@@ -247,6 +247,57 @@ curl -i -X POST "http://$ALB_DNS/orders" \
   -d '{"customer_email":"test@vitalora.fr","items":[{"product_id":20,"qty":50}]}'
 ```
 
+### 3.3 Phase 4 — Événementiel (SNS / SQS / Lambda)
+
+```
+POST /orders ──publish──> SNS vitalora-order-confirmation
+                            ├─> SQS vitalora-order-processing (DLQ après 3 échecs)
+                            │      └─> Lambda vitalora-order-processor
+                            │            1. CUSTOMER_CONFIRMATION
+                            │            2. INTERNAL_NOTIFICATION
+                            │            3. PROCESSING_SIMULATION
+
+Lambda ──publish (1 message/étape)──> SNS vitalora-order-notifications ──> e-mail (optionnel)
+```
+
+- Module `modules/messaging` : topic, file + DLQ, abonnement SNS -> SQS (fan-out,
+  `raw_message_delivery`), Lambda consommatrice et log group CloudWatch.
+- L'app publie **après le commit** de la commande ; un échec SNS est loggé mais
+  ne fait pas échouer la commande. Le rôle IAM de l'EC2 n'a `sns:Publish` que sur
+  l'ARN de ce topic.
+- Les 3 étapes tournent séquentiellement dans la même invocation Lambda : l'ordre
+  confirmation -> notification interne -> traitement est donc garanti.
+- Notifications par étape (optionnel) : renseigne `notification_email` dans
+  `terraform.tfvars`, relance `terraform apply`, puis clique sur le lien de
+  confirmation d'abonnement reçu d'AWS. Tu reçois ensuite 3 e-mails par commande
+  (`1/3 Confirmation client`, `2/3 Notification interne`, `3/3 Traitement termine`).
+  L'adresse est fixe (celle de l'abonnement) : ce n'est pas l'e-mail saisi par le
+  client, qui nécessiterait SES. Sans e-mail, les traces CloudWatch Logs suffisent.
+- Vérifier que SNS fonctionne : `journalctl -u vitalora | grep "published to SNS"`
+  sur l'EC2, ou les métriques CloudWatch `AWS/SNS` (`NumberOfMessagesPublished`,
+  `NumberOfNotificationsDelivered`, `NumberOfNotificationsFailed`).
+
+> Après `terraform apply`, l'ASG ne remplace pas l'instance existante : lance un
+> instance refresh (ou termine l'instance, l'ASG en recrée une avec le nouveau
+> `user_data`) pour que l'app embarque le SDK SNS et la variable `ORDER_TOPIC_ARN`.
+
+**Valider** : passer une commande, puis lire les logs du consommateur :
+
+```bash
+ALB_DNS=$(terraform output -raw alb_dns_name)
+curl -s -X POST "http://$ALB_DNS/orders" -H "Content-Type: application/json" \
+  -d '{"customer_email":"test@vitalora.fr","items":[{"product_id":1,"qty":1}]}'
+
+sleep 10
+aws logs tail "$(terraform output -raw order_consumer_log_group)" \
+  --since 5m --region eu-west-3 --profile default
+```
+
+Attendu, dans cet ordre : `CUSTOMER_CONFIRMATION`, `INTERNAL_NOTIFICATION`, puis
+`PROCESSING_SIMULATION` (« Préparation en cours » puis « traitée »). Côté app :
+`journalctl -u vitalora | grep "published to SNS"` sur l'EC2. Un message en échec
+atterrit dans la DLQ (`terraform output order_queue_url` pour la file principale).
+
 ## 4. Nettoyer (toujours, en fin de session — voir Gouvernance budgétaire)
 
 ```bash
@@ -255,9 +306,6 @@ terraform destroy
 
 ## Ce qui reste à brancher par le reste de l'équipe
 
-- **Personne C (Phase 4)** : créer le topic SNS nommé `vitalora-order-confirmation`
-  (le rôle IAM de l'EC2 autorise déjà `sns:Publish` sur `vitalora-*`) puis
-  décommenter/compléter le TODO dans `app/server.js` (route `POST /orders`).
 - **Personne C (Phase 5)** : CloudTrail, dashboard CloudWatch, alarmes — rien
   à modifier côté réseau/compute, juste à lire les ressources déjà taguées
   `Owner = var.owner_tag`.

@@ -18,10 +18,7 @@ data "aws_caller_identity" "current" {}
 # ---------------------------------------------------------------------------
 # IAM — rôle d'instance en moindre privilège
 # ---------------------------------------------------------------------------
-# Le sns:Publish est scopé par CONVENTION DE NOMMAGE (project_name-*) plutôt
-# que par ARN exact : ça découple ce module du topic SNS que Personne C
-# créera en Phase 4, sans dépendance Terraform entre nos deux parties. Il lui
-# suffit de nommer son topic "${var.project_name}-order-confirmation".
+# Le sns:Publish est scopé à l'ARN exact du topic order-confirmation (Phase 4).
 
 resource "aws_iam_role" "ec2" {
   name = "${var.project_name}-ec2-role"
@@ -67,7 +64,7 @@ resource "aws_iam_role_policy" "ec2" {
         Sid      = "PublishOrderEvents"
         Effect   = "Allow"
         Action   = ["sns:Publish"]
-        Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${var.project_name}-*"
+        Resource = var.order_topic_arn
       }
     ]
   })
@@ -98,7 +95,7 @@ resource "aws_launch_template" "web" {
 
   user_data = base64encode(templatefile("${path.module}/templates/user_data.sh.tpl", {
     package_json         = file("${path.module}/../../app/package.json")
-    server_js            = file("${path.module}/../../app/server.js")
+    server_js_gz         = base64gzip(file("${path.module}/../../app/server.js"))
     index_html_gz        = base64gzip(file("${path.module}/../../app/public/index.html"))
     app_js_gz            = base64gzip(file("${path.module}/../../app/public/app.js"))
     style_css_gz         = base64gzip(file("${path.module}/../../app/public/style.css"))
@@ -108,6 +105,7 @@ resource "aws_launch_template" "web" {
     db_password_ssm_name = var.db_password_ssm_name
     assets_bucket        = var.assets_bucket_name
     aws_region           = var.aws_region
+    order_topic_arn      = var.order_topic_arn
   }))
 
   tag_specifications {

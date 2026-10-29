@@ -32,3 +32,9 @@ variable "key_name" {
   type    = string
   default = null
 }
+
+variable "notification_email" {
+  description = "E-mail abonné au topic SNS order-notifications : 1 e-mail par étape (à confirmer via le lien reçu). null = aucun abonnement, la trace CloudWatch Logs suffit."
+  type        = string
+  default     = null
+}
