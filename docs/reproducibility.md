@@ -4,6 +4,11 @@ Pour partir d’un compte et d’une machine neufs, suivre le
 [guide de déploiement](new-account.md), puis conserver la révision et les
 résultats de validation obtenus dans votre compte.
 
+Une reproduction depuis une autre machine dans un nouveau compte AWS indépendant
+a été confirmée par l’équipe le 2 novembre 2026. Le
+[compte rendu](evidence/2026-11-02-reproduction/README.md) précise la portée de cette
+confirmation et la distingue des résultats automatisés archivés.
+
 ## Opérations de maintenance
 
 ```sh

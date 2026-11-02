@@ -27,7 +27,11 @@ Lambda. Attendre le rétablissement de l’alarme avant de la déclencher en dir
 | 5:00–6:00 | Filtrer les journaux par identifiant de commande | Publication, confirmation, préparation et expédition ; gestion des doublons |
 | 6:00–7:00 | Montrer chiffrement, audit et tableau de bord | RDS/S3 privés, rôles distincts, audit de gestion et métriques |
 | 7:00–8:00 | Injecter l’erreur contrôlée | Vraie alarme de traitement ; différence avec une erreur d’invocation Lambda |
-| 8:00–9:00 | Expliquer reproduction et suppression | Même compte validé, autres comptes non vérifiés ; socle conservé et facturation différée |
+| 8:00–9:00 | Expliquer reproduction et suppression | Déploiement sur une autre machine dans un nouveau compte confirmé par l’équipe ; socle conservé et facturation différée |
+
+La [confirmation de reproduction du 2 novembre 2026](evidence/2026-11-02-reproduction/README.md)
+porte sur le déploiement réussi dans un nouveau compte depuis une autre machine.
+Les preuves automatisées détaillées du 29 octobre gardent leur périmètre d’origine.
 
 Pour une vérification automatisée avec lecture directe de RDS :
 

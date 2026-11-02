@@ -83,5 +83,6 @@ une fois. Les statuts techniques de l’API restent en anglais et l’interface 
 traduit en français.
 
 Une extension de haute disponibilité utiliserait deux instances EC2 et RDS
-Multi-AZ. Son coût supplémentaire doit être distingué de la démo réellement
-vérifiée dans un seul compte.
+Multi-AZ. Son coût supplémentaire doit être distingué de la configuration de
+démonstration. La [reproduction dans un nouveau compte depuis une autre machine](evidence/2026-11-02-reproduction/README.md)
+a été confirmée par l’équipe le 2 novembre 2026.

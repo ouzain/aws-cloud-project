@@ -206,6 +206,10 @@ dans `test-results/cleanup.json`. Une séance déjà approuvée peut utiliser
   [scénario de démonstration](docs/demo-script.md).
 - [État des fonctionnalités et limites](PROJECT_STATUS.md).
 
+Le 2 novembre 2026, l’équipe a confirmé un déploiement réussi depuis une autre
+machine dans un nouveau compte AWS indépendant. Le [compte rendu de reproduction](docs/evidence/2026-11-02-reproduction/README.md)
+distingue cette confirmation des contrôles automatisés archivés.
+
 Les résultats sous `docs/evidence/` sont des preuves datées, avec le périmètre
 de chaque exécution. Ils ne sont pas des paramètres à copier dans un compte.
 Chaque utilisateur doit effectuer ses propres vérifications fonctionnelles,

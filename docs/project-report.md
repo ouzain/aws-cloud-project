@@ -129,8 +129,8 @@ le paquet partagé et le renouvellement des instances. EC2 et Lambda utilisent
 le même paquet verrouillé. Les dépendances AWS SDK sont fixées à 3.1159.0 et
 l’audit archivé ne signalait alors aucune vulnérabilité connue.
 
-Les neuf tests applicatifs et les quatre tests de propriété de gouvernance
-Terraform ont réussi. La première vérification AWS a contrôlé les 40 images,
+Les neuf tests applicatifs et les trente-quatre tests Python ont réussi lors
+des contrôles locaux archivés. La première vérification AWS a contrôlé les 40 images,
 le stock transactionnel, l’idempotence HTTP, l’annulation d’un produit invalide,
 l’historique complet, la lecture directe de RDS et les journaux corrélés. Les
 contrôles de sécurité ont vérifié chiffrement, confidentialité, livraison d’audit,
@@ -142,6 +142,13 @@ dans [les preuves de validation](evidence/2026-10-29-fr-aws/README.md).
 Les [contrôles de portabilité](evidence/2026-10-29-portability/README.md)
 couvrent les modèles IAM, les erreurs de premier déploiement et une copie
 source neuve. Ils ne certifient pas le déploiement dans tous les comptes.
+
+Le 2 novembre 2026, l’équipe a confirmé la réussite du déploiement depuis une autre
+machine dans un nouveau compte AWS indépendant. Cette reproduction complète les
+contrôles locaux de portabilité. Le [compte rendu](evidence/2026-11-02-reproduction/README.md)
+consigne la confirmation de l’équipe ; les journaux de cette exécution n’y sont
+pas annexés. Les vérifications automatisées du compte initial conservent leur
+périmètre, notamment pour la supervision et la suppression.
 
 ## Reproduction et soutenance
 
