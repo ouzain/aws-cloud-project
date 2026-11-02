@@ -1,4 +1,4 @@
-# Préparation du déploiement dans un compte neuf
+# Préparation du déploiement dans un compte neuf — contrôles du 29 octobre 2026
 
 Les [résultats](verification.json) distinguent les contrôles locaux de la
 validation AWS qui reste à faire dans un deuxième compte. Les
@@ -27,3 +27,11 @@ déployé par ces tests. Les quotas, restrictions du compte, connexion IAM et
 l’adresse budgétaire du propriétaire doivent encore être validés sur le compte cible.
 
 Consulter [le parcours complet](../../new-account.md) avant le déploiement réel.
+
+## Confirmation ultérieure
+
+Les constats ci-dessus décrivent les seuls contrôles du 29 octobre 2026.
+Le 2 novembre 2026, l’équipe a confirmé un déploiement réussi depuis une autre
+machine dans un nouveau compte AWS indépendant. Le
+[compte rendu séparé](../2026-11-02-reproduction/README.md) conserve cette
+confirmation sans modifier les résultats JSON historiques.

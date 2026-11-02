@@ -87,6 +87,7 @@ d’état indépendant reste ; audit et budget sont conservés s’ils préexist
 sinon supprimés avec l’environnement. Les politiques de déploiement restent
 attachées. Vérifier séparément les coûts et les ressources conservées.
 
-La configuration est préparée pour ce parcours. La preuve d’un second compte
-AWS réel reste à fournir ; les tests dans un dossier neuf sur la machine de
-développement ne constituent pas une deuxième machine ni un autre compte.
+Le 2 novembre 2026, l’équipe a confirmé un déploiement réussi depuis une autre
+machine dans un nouveau compte AWS indépendant. Voir le
+[compte rendu de reproduction](evidence/2026-11-02-reproduction/README.md).
+Les contrôles locaux du 29 octobre restent distincts de cette reproduction réelle.
